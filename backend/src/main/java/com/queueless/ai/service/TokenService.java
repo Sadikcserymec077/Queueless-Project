@@ -61,7 +61,7 @@ public class TokenService {
         LocalDate today = LocalDate.ofInstant(now, ZoneOffset.UTC);
         Instant startOfDay = today.atStartOfDay().toInstant(ZoneOffset.UTC);
         Instant endOfDay = today.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
-        long todayBookings = tokenRepository.countByUserIdAndBookingTimeBetween(userId, startOfDay, endOfDay);
+        long todayBookings = tokenRepository.countByUserIdAndBookingTimeBetweenAndStatusNot(userId, startOfDay, endOfDay, TokenStatus.CANCELLED);
         if (todayBookings >= 10) {
             throw new BadRequestException("You can only book up to 10 tokens per day across all organizations");
         }

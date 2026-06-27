@@ -33,7 +33,7 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
 
     long countByCounterIdAndBookingTimeBetween(Long counterId, Instant from, Instant to);
 
-    long countByUserIdAndBookingTimeBetween(Long userId, Instant from, Instant to);
+    long countByUserIdAndBookingTimeBetweenAndStatusNot(Long userId, Instant from, Instant to, TokenStatus status);
 
     long countByStatus(TokenStatus status);
 
