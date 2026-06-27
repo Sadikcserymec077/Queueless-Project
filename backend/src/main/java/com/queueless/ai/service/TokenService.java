@@ -62,8 +62,8 @@ public class TokenService {
         Instant startOfDay = today.atStartOfDay().toInstant(ZoneOffset.UTC);
         Instant endOfDay = today.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
         long todayBookings = tokenRepository.countByUserIdAndBookingTimeBetween(userId, startOfDay, endOfDay);
-        if (todayBookings >= 2) {
-            throw new BadRequestException("You can only book up to 2 tokens per day across all organizations");
+        if (todayBookings >= 10) {
+            throw new BadRequestException("You can only book up to 10 tokens per day across all organizations");
         }
         String tokenNumber = generateTokenNumber(counter, now);
         String qrPayload = "QLAI::" + tokenNumber + "::" + counter.getId();
