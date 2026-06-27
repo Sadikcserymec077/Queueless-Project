@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@stomp/stompjs": "^7.0.0",
     "@vitejs/plugin-react": "^6.0.3",
     "axios": "^1.7.7",
@@ -21,6 +22,5 @@
     "react-router-dom": "^6.28.0",
     "sockjs-client": "^1.6.1",
     "vite": "^8.1.0"
-  },
-  "devDependencies": {}
+  }
 }

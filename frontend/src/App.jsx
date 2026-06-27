@@ -18,6 +18,7 @@ import CounterManagement from "./pages/admin/CounterManagement.jsx";
 import QueueMonitoring from "./pages/admin/QueueMonitoring.jsx";
 import AnalyticsDashboard from "./pages/admin/AnalyticsDashboard.jsx";
 import UserManagement from "./pages/admin/UserManagement.jsx";
+import AIChatbot from "./components/AIChatbot.jsx";
 
 export default function App() {
   return (
@@ -54,6 +55,7 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <AIChatbot />
       </main>
     </>
   );
