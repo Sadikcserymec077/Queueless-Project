@@ -316,7 +316,7 @@ public class TokenService {
         Instant start = date.atStartOfDay().toInstant(ZoneOffset.UTC);
         Instant end = date.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
         long sequence = tokenRepository.countByCounterIdAndBookingTimeBetween(counter.getId(), start, end) + 1;
-        return "QL-" + date.format(DateTimeFormatter.BASIC_ISO_DATE) + "-C" + counter.getCounterNumber() + "-"
+        return "QL-" + date.format(DateTimeFormatter.BASIC_ISO_DATE) + "-O" + counter.getOrganization().getId() + "-C" + counter.getCounterNumber() + "-"
                 + String.format("%03d", sequence);
     }
 
