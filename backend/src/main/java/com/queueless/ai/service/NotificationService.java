@@ -85,26 +85,31 @@ public class NotificationService {
         if (!emailEnabled) {
             return;
         }
-        try {
-            jakarta.mail.internet.MimeMessage mimeMessage = mailSender.createMimeMessage();
-            org.springframework.mail.javamail.MimeMessageHelper helper = new org.springframework.mail.javamail.MimeMessageHelper(mimeMessage, "utf-8");
-            
-            // Extract display name and email if formatted as "Name <email>"
-            String display = "QueueLess AI";
-            String email = mailFrom;
-            if (mailFrom.contains("<") && mailFrom.endsWith(">")) {
-                int start = mailFrom.indexOf("<");
-                display = mailFrom.substring(0, start).trim();
-                email = mailFrom.substring(start + 1, mailFrom.length() - 1).trim();
+        
+        // Log the email content to the console for easy local development testing!
+        log.info("================ EMAIL NOTIFICATION ================\nTo: {}\nSubject: {}\n\n{}\n==================================================", user.getEmail(), title, message);
+
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                jakarta.mail.internet.MimeMessage mimeMessage = mailSender.createMimeMessage();
+                org.springframework.mail.javamail.MimeMessageHelper helper = new org.springframework.mail.javamail.MimeMessageHelper(mimeMessage, "utf-8");
+                
+                String display = "QueueLess AI";
+                String email = mailFrom;
+                if (mailFrom.contains("<") && mailFrom.endsWith(">")) {
+                    int start = mailFrom.indexOf("<");
+                    display = mailFrom.substring(0, start).trim();
+                    email = mailFrom.substring(start + 1, mailFrom.length() - 1).trim();
+                }
+                
+                helper.setFrom(email, display);
+                helper.setTo(user.getEmail());
+                helper.setSubject(title);
+                helper.setText(message, false);
+                mailSender.send(mimeMessage);
+            } catch (Exception exception) {
+                log.warn("Failed to send email notification via SMTP (Did you set the MAIL_PASSWORD app password in application.yml?): {}", exception.getMessage());
             }
-            
-            helper.setFrom(email, display);
-            helper.setTo(user.getEmail());
-            helper.setSubject(title);
-            helper.setText(message, false);
-            mailSender.send(mimeMessage);
-        } catch (Exception exception) {
-            log.warn("Failed to send email notification to {}", user.getEmail(), exception);
-        }
+        });
     }
 }
