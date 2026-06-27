@@ -1,27 +1,66 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { subscribeToUser } from "../services/socket.js";
-import { BellRing, X } from "lucide-react";
+import { tokensApi } from "../services/api.js";
+import { BellRing, X, Clock } from "lucide-react";
 
 export default function GlobalListener() {
   const { user } = useAuth();
   const [calledToken, setCalledToken] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(120);
+  const timerRef = useRef(null);
 
   useEffect(() => {
     if (!user || user.role !== "USER") return;
 
     const unsubscribe = subscribeToUser(user.id, (message) => {
-      // The message could be a TokenResponse or QueueStatusResponse
       const tokenData = message.token ? message.token : message;
       
       if (tokenData && tokenData.status === "CALLED") {
         setCalledToken(tokenData);
+        setTimeLeft(120);
         playTingSound();
       }
     });
 
     return () => unsubscribe();
   }, [user]);
+
+  useEffect(() => {
+    if (calledToken) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timerRef.current);
+            handleAutoSkip(calledToken.id);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [calledToken]);
+
+  const handleAutoSkip = async (tokenId) => {
+    try {
+      await tokensApi.skip(tokenId);
+      setCalledToken(null);
+      window.location.reload();
+    } catch (e) {
+      console.error("Failed to auto-skip token", e);
+      setCalledToken(null);
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const playTingSound = () => {
     try {
@@ -73,21 +112,6 @@ export default function GlobalListener() {
         animation: "slideIn 0.3s ease-out forwards",
         position: "relative"
       }}>
-        <button 
-          onClick={() => setCalledToken(null)}
-          style={{
-            position: "absolute",
-            top: "1rem",
-            right: "1rem",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "#6b7280"
-          }}
-        >
-          <X size={24} />
-        </button>
-        
         <div style={{
           background: "#ecfdf5",
           width: "80px",
@@ -106,19 +130,36 @@ export default function GlobalListener() {
         <h2 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "0.5rem", color: "#111827" }}>
           It's Your Turn!
         </h2>
-        <p style={{ fontSize: "1rem", color: "#4b5563", marginBottom: "1.5rem" }}>
+        <p style={{ fontSize: "1rem", color: "#4b5563", marginBottom: "1rem" }}>
           Your token <strong>{calledToken.tokenNumber}</strong> has been called at <strong>{calledToken.counterName}</strong>. Please proceed to the counter immediately.
         </p>
+
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "0.5rem",
+          color: timeLeft < 30 ? "#ef4444" : "#f59e0b",
+          fontWeight: "600",
+          fontSize: "1.25rem",
+          marginBottom: "1.5rem",
+          background: timeLeft < 30 ? "#fef2f2" : "#fffbeb",
+          padding: "0.5rem 1rem",
+          borderRadius: "8px"
+        }}>
+          <Clock size={20} />
+          <span>{formatTime(timeLeft)}</span>
+        </div>
         
         <button 
           onClick={() => {
             setCalledToken(null);
-            window.location.reload(); // Refresh the page as requested
+            window.location.reload(); 
           }}
           className="primary-action"
           style={{ width: "100%", padding: "0.75rem", fontSize: "1.125rem", justifyContent: "center" }}
         >
-          Acknowledge & Refresh
+          Acknowledge
         </button>
       </div>
       
