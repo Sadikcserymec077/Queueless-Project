@@ -63,7 +63,7 @@ export default function AIChatbot() {
           fallbackText = "Hello there! How can I assist you with the QueueLess platform today?";
         } 
         // Identity
-        else if (lower.includes("what is this website") || lower.includes("tell me about") || lower.includes("what is queueless")) {
+        else if (lower.includes("website") || lower.includes("webiste") || lower.includes("tell me about") || lower.includes("what is queueless")) {
           fallbackText = "This is QueueLess AI, a smart token management system! It allows users to book virtual tokens for hospitals, banks, and government offices so you don't have to wait in physical lines. You can track your queue status in real-time!";
         }
         else if (lower.includes("how are you") || lower.includes("how do you do")) {
