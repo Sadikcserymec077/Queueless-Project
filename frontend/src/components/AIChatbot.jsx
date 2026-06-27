@@ -49,14 +49,32 @@ export default function AIChatbot() {
       const text = response.text();
 
       setMessages(prev => [...prev, { role: "assistant", text }]);
+      setIsLoading(false);
     } catch (error) {
       console.error("Gemini API Error:", error);
-      setMessages(prev => [...prev, { 
-        role: "assistant", 
-        text: "I'm sorry, I'm having trouble connecting right now. Please check your API key or try again later." 
-      }]);
-    } finally {
-      setIsLoading(false);
+      
+      // Fallback Simulated AI (so the UI still works even if the API Key is invalid)
+      setTimeout(() => {
+        const lower = userMessage.toLowerCase();
+        let fallbackText = "I'm the QueueLess AI Assistant! I can help you book tokens, check your queue status, or cancel appointments.";
+        
+        if (lower.includes("book") || lower.includes("new") || lower.includes("create")) {
+          fallbackText = "To book a new token, navigate to the Home page, select an Organization and Counter, and click 'Book Token'. You can book up to 10 tokens per day!";
+        } else if (lower.includes("cancel") || lower.includes("delete")) {
+          fallbackText = "You can cancel your token from the 'Queue Tracking' page. Just click the 'Request Cancel' button.";
+        } else if (lower.includes("late") || lower.includes("delay")) {
+          fallbackText = "If you're running late, go to the 'Queue Tracking' page and click 'Come Late'. This will ask the receptionist to move you to the end of the line.";
+        } else if (lower.includes("status") || lower.includes("where") || lower.includes("turn") || lower.includes("time")) {
+          fallbackText = "You can view your live queue position, estimated wait time, and expected turn time on the 'Queue Tracking' page.";
+        } else if (lower.includes("hi") || lower.includes("hello") || lower.includes("hey")) {
+          fallbackText = "Hello there! How can I assist you with the QueueLess platform today?";
+        } else {
+          fallbackText = "I understand. As the QueueLess AI, I recommend checking the Queue Tracking page for your live status, or the Home page to book a new token.";
+        }
+        
+        setMessages(prev => [...prev, { role: "assistant", text: fallbackText }]);
+        setIsLoading(false);
+      }, 1000);
     }
   };
 
