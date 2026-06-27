@@ -33,7 +33,7 @@ public class AuthService {
     private final NotificationService notificationService;
 
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public UserResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new BadRequestException("Email is already registered");
         }
@@ -56,8 +56,7 @@ public class AuthService {
             // Ignore email errors so registration still succeeds
         }
         
-        String token = jwtService.generateToken(new UserPrincipal(saved));
-        return new AuthResponse(token, "Bearer", toUserResponse(saved));
+        return toUserResponse(saved);
     }
 
     @Transactional(readOnly = true)

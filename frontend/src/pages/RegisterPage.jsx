@@ -12,19 +12,38 @@ export default function RegisterPage() {
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const [success, setSuccess] = useState(false);
+
   const submit = async (event) => {
     event.preventDefault();
     setBusy(true);
     setError("");
     try {
       await register(form);
-      navigate("/user/dashboard", { replace: true });
+      setSuccess(true);
     } catch (err) {
       setError(apiError(err));
     } finally {
       setBusy(false);
     }
   };
+
+  if (success) {
+    return (
+      <section className="auth-layout">
+        <div className="auth-card" style={{ textAlign: "center", padding: "2rem" }}>
+          <h2>Registration Successful</h2>
+          <p style={{ margin: "1rem 0" }}>
+            We've sent a verification link to <strong>{form.email}</strong>. 
+            Please check your inbox and verify your email before logging in.
+          </p>
+          <Link to="/login" className="primary-action" style={{ display: "inline-block", marginTop: "1rem" }}>
+            Go to Login
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="auth-layout">

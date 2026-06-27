@@ -40,8 +40,8 @@ export function AuthProvider({ children }) {
     },
     async register(payload) {
       const response = await authApi.register(payload);
-      saveSession(response);
-      return response.user;
+      // Registration successful, but email needs verification. Do not login.
+      return response; // returning the message/user object
     },
     logout() {
       storage.removeToken();

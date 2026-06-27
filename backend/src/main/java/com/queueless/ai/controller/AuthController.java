@@ -6,6 +6,7 @@ import com.queueless.ai.dto.AuthDtos.LoginRequest;
 import com.queueless.ai.dto.AuthDtos.RegisterRequest;
 import com.queueless.ai.dto.AuthDtos.ForgotPasswordRequest;
 import com.queueless.ai.dto.AuthDtos.ResetPasswordRequest;
+import com.queueless.ai.dto.AuthDtos.UserResponse;
 import com.queueless.ai.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +26,9 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<ApiResponse<UserResponse>> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Registration successful", authService.register(request)));
+                .body(ApiResponse.success("Registration successful. Please verify your email.", authService.register(request)));
     }
 
     @PostMapping("/login")
