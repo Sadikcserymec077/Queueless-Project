@@ -64,14 +64,15 @@ public class AuthService {
         var authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email().trim().toLowerCase(), request.password())
         );
-        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        User user = userRepository.findByEmail(request.email().trim().toLowerCase())
+                .orElseThrow(() -> new BadRequestException("User not found"));
         
-        if (!principal.getUser().isEmailVerified()) {
+        if (!user.isEmailVerified()) {
             throw new BadRequestException("Please verify your email before logging in.");
         }
         
-        String token = jwtService.generateToken(principal);
-        return new AuthResponse(token, "Bearer", toUserResponse(principal.getUser()));
+        String token = jwtService.generateToken(new UserPrincipal(user));
+        return new AuthResponse(token, "Bearer", toUserResponse(user));
     }
 
     public UserResponse toUserResponse(User user) {
