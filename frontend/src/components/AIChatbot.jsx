@@ -56,20 +56,41 @@ export default function AIChatbot() {
       // Fallback Simulated AI (so the UI still works even if the API Key is invalid)
       setTimeout(() => {
         const lower = userMessage.toLowerCase();
-        let fallbackText = "I'm the QueueLess AI Assistant! I can help you book tokens, check your queue status, or cancel appointments.";
+        let fallbackText = "I'm the QueueLess AI Assistant! I can help you navigate this platform to book tokens, track your queue, and cancel appointments.";
         
-        if (lower.includes("book") || lower.includes("new") || lower.includes("create")) {
-          fallbackText = "To book a new token, navigate to the Home page, select an Organization and Counter, and click 'Book Token'. You can book up to 10 tokens per day!";
-        } else if (lower.includes("cancel") || lower.includes("delete")) {
-          fallbackText = "You can cancel your token from the 'Queue Tracking' page. Just click the 'Request Cancel' button.";
-        } else if (lower.includes("late") || lower.includes("delay")) {
-          fallbackText = "If you're running late, go to the 'Queue Tracking' page and click 'Come Late'. This will ask the receptionist to move you to the end of the line.";
-        } else if (lower.includes("status") || lower.includes("where") || lower.includes("turn") || lower.includes("time")) {
-          fallbackText = "You can view your live queue position, estimated wait time, and expected turn time on the 'Queue Tracking' page.";
-        } else if (lower.includes("hi") || lower.includes("hello") || lower.includes("hey")) {
+        // Greeting
+        if (/^(hi|hello|hey|howdy|greetings)\b/i.test(lower)) {
           fallbackText = "Hello there! How can I assist you with the QueueLess platform today?";
-        } else {
-          fallbackText = "I understand. As the QueueLess AI, I recommend checking the Queue Tracking page for your live status, or the Home page to book a new token.";
+        } 
+        // Identity
+        else if (lower.includes("what is this website") || lower.includes("tell me about") || lower.includes("what is queueless")) {
+          fallbackText = "This is QueueLess AI, a smart token management system! It allows users to book virtual tokens for hospitals, banks, and government offices so you don't have to wait in physical lines. You can track your queue status in real-time!";
+        }
+        else if (lower.includes("how are you") || lower.includes("how do you do")) {
+          fallbackText = "I'm just a virtual assistant, but I'm doing great! Ready to help you skip the queue. What do you need help with?";
+        }
+        else if (lower.includes("who are you") || lower.includes("your name")) {
+          fallbackText = "I'm the QueueLess AI Assistant. I'm here to guide you through booking and managing your virtual tokens.";
+        }
+        // Booking
+        else if (lower.includes("book") || lower.includes("new token") || lower.includes("create token") || lower.includes("appointment")) {
+          fallbackText = "To book a new token, please navigate to the 'Home' page. From there, select an Organization and a Counter, and click 'Book Token'. Remember, you can book up to 10 tokens per day!";
+        } 
+        // Cancellation
+        else if (lower.includes("cancel") || lower.includes("delete") || lower.includes("remove token")) {
+          fallbackText = "If you need to cancel your token, please go to the 'Queue Tracking' page. There you will see a red 'Request Cancel' button. Click it to send a cancellation request to the receptionist.";
+        } 
+        // Delay/Come Late
+        else if (lower.includes("late") || lower.includes("delay") || lower.includes("reschedule") || lower.includes("postpone")) {
+          fallbackText = "Running late? No problem. Navigate to the 'Queue Tracking' page and click 'Come Late'. This will notify the receptionist to move you to the end of the line, so you don't miss your turn completely.";
+        } 
+        // Status tracking
+        else if (lower.includes("status") || lower.includes("where") || lower.includes("turn") || lower.includes("time") || lower.includes("when") || lower.includes("wait")) {
+          fallbackText = "You can view your live queue position, estimated wait time, and expected turn time by going to the 'Queue Tracking' page. It updates in real-time as the queue moves!";
+        } 
+        // Generic fallback
+        else {
+          fallbackText = "I'm sorry, I didn't quite catch that. As the QueueLess AI, I can help you with booking tokens, tracking your queue status, canceling, or letting the receptionist know you are running late. Try asking me 'How do I book a token?'";
         }
         
         setMessages(prev => [...prev, { role: "assistant", text: fallbackText }]);
