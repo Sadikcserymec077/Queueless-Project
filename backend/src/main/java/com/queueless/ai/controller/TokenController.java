@@ -105,6 +105,19 @@ public class TokenController {
         return ApiResponse.success("Cancellation request sent to organization", null);
     }
 
+    @PostMapping("/{id}/request-delay")
+    @PreAuthorize("hasRole('USER')")
+    public ApiResponse<Void> requestDelay(@PathVariable Long id) {
+        tokenService.requestDelay(id, SecurityUtils.currentUser().getId());
+        return ApiResponse.success("Delay request sent to organization", null);
+    }
+
+    @PatchMapping("/{id}/delay")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN', 'SUB_ADMIN', 'STAFF', 'DOCTOR')")
+    public ApiResponse<TokenResponse> delay(@PathVariable Long id) {
+        return ApiResponse.success("Token delayed", tokenService.delay(id));
+    }
+
     @PostMapping("/verify-qr")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN', 'SUB_ADMIN', 'STAFF', 'DOCTOR')")
     public ApiResponse<TokenResponse> verifyQr(@Valid @RequestBody QrVerificationRequest request) {

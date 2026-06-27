@@ -79,7 +79,9 @@ export const tokensApi = {
   complete: (id) => unwrap(client.patch(`/tokens/${id}/complete`)),
   skip: (id) => unwrap(client.patch(`/tokens/${id}/skip`)),
   requeue: (id) => unwrap(client.patch(`/tokens/${id}/requeue`)),
+  delay: (id) => unwrap(client.patch(`/tokens/${id}/delay`)),
   requestCancel: (id) => unwrap(client.post(`/tokens/${id}/request-cancel`)),
+  requestDelay: (id) => unwrap(client.post(`/tokens/${id}/request-delay`)),
   verifyQr: (qrPayload) => unwrap(client.post("/tokens/verify-qr", { qrPayload }))
 };
 

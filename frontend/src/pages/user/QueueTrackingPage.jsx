@@ -42,6 +42,17 @@ export default function QueueTrackingPage() {
     }
   };
 
+  const requestDelay = async () => {
+    if (!active) return;
+    if (!confirm("Are you sure you want to request to come late? Your token will be moved to the end of the line if approved.")) return;
+    try {
+      await tokensApi.requestDelay(active.id);
+      alert("Come late request sent to the organization.");
+    } catch (err) {
+      setError(apiError(err));
+    }
+  };
+
   return (
     <section className="page-stack">
       <div className="page-heading">
@@ -64,7 +75,10 @@ export default function QueueTrackingPage() {
             <div><span>Estimated wait</span><strong>{minutesLabel(status?.estimatedWaitingTimeMinutes)}</strong></div>
             <div><span>Expected turn</span><strong>{formatDate(status?.expectedTurnTime)}</strong></div>
           </div>
-          <button className="danger-action" type="button" onClick={requestCancel}><XCircle size={18} /> Request Cancel</button>
+          <div className="tracking-actions" style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
+            <button className="secondary-action" type="button" onClick={requestDelay}>🏃‍♂️ Come Late</button>
+            <button className="danger-action" type="button" onClick={requestCancel}><XCircle size={18} /> Request Cancel</button>
+          </div>
         </>
       )}
     </section>

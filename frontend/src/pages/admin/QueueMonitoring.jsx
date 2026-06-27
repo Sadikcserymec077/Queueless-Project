@@ -65,6 +65,10 @@ export default function QueueMonitoring() {
         if (confirm(`User ${message.token.userName} (${message.token.tokenNumber}) requested to cancel their token. Approve cancellation?`)) {
           tokensApi.cancel(message.token.id).then(() => loadQueue());
         }
+      } else if (message.type === "DELAY_REQUEST") {
+        if (confirm(`User ${message.token.userName} (${message.token.tokenNumber}) requested to come late. Move them to the end of the line?`)) {
+          tokensApi.delay(message.token.id).then(() => loadQueue());
+        }
       } else {
         setQueue(message);
       }

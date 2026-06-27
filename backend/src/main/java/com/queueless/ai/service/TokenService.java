@@ -173,6 +173,33 @@ public class TokenService {
             java.util.Map.of("type", "CANCEL_REQUEST", "token", toResponse(token)));
     }
 
+    @Transactional(readOnly = true)
+    public void requestDelay(Long tokenId, Long userId) {
+        Token token = find(tokenId);
+        if (!token.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Token does not belong to current user");
+        }
+        if (token.getStatus() != TokenStatus.WAITING) {
+            throw new BadRequestException("Can only request to come late for waiting tokens");
+        }
+        
+        queueEventPublisher.publishCounterUpdate(token.getCounter().getId(), 
+            java.util.Map.of("type", "DELAY_REQUEST", "token", toResponse(token)));
+    }
+
+    @Transactional
+    public TokenResponse delay(Long tokenId) {
+        Token token = find(tokenId);
+        if (token.getStatus() != TokenStatus.WAITING) {
+            throw new BadRequestException("Only waiting tokens can be delayed");
+        }
+        token.setBookingTime(Instant.now());
+        notificationService.notifyUser(token.getUser(), "Token delayed", "Your token " + token.getTokenNumber() + " has been moved to the end of the line.");
+        publishQueue(token.getCounter().getId());
+        queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
+        return toResponse(token);
+    }
+
     @Transactional
     public TokenResponse callNext(Long counterId) {
         Counter counter = counterService.find(counterId);
