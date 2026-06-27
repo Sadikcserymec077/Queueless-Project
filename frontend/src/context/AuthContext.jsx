@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { authApi, storage } from "../services/api.js";
 
 const AuthContext = createContext(null);
@@ -11,6 +11,24 @@ export function AuthProvider({ children }) {
     storage.setUser(authResponse.user);
     setUser(authResponse.user);
   };
+
+  useEffect(() => {
+    async function loadUser() {
+      if (storage.getToken()) {
+        try {
+          const freshUser = await authApi.me();
+          storage.setUser(freshUser);
+          setUser(freshUser);
+        } catch (err) {
+          // If token is invalid or expired, clear session
+          storage.removeToken();
+          storage.removeUser();
+          setUser(null);
+        }
+      }
+    }
+    loadUser();
+  }, []);
 
   const value = useMemo(() => ({
     user,

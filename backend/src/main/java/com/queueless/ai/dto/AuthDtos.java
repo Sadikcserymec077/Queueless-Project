@@ -35,7 +35,9 @@ public class AuthDtos {
             String name,
             String email,
             Role role,
-            boolean enabled
+            boolean enabled,
+            Long organizationId,
+            String organizationName
     ) {
     }
 

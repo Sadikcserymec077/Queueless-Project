@@ -75,7 +75,9 @@ public class AuthService {
     }
 
     public UserResponse toUserResponse(User user) {
-        return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.isEnabled());
+        Long orgId = user.getOrganization() != null ? user.getOrganization().getId() : null;
+        String orgName = user.getOrganization() != null ? user.getOrganization().getName() : null;
+        return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.isEnabled(), orgId, orgName);
     }
 
     @Transactional

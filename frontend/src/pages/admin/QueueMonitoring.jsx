@@ -5,8 +5,10 @@ import TokenCard from "../../components/TokenCard.jsx";
 import { countersApi, organizationsApi, tokensApi } from "../../services/api.js";
 import { subscribeToCounter } from "../../services/socket.js";
 import { apiError, formatDate } from "../../utils/format.js";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 export default function QueueMonitoring() {
+  const { user } = useAuth();
   const [organizations, setOrganizations] = useState([]);
   const [organizationId, setOrganizationId] = useState("");
   const [counters, setCounters] = useState([]);
@@ -18,8 +20,14 @@ export default function QueueMonitoring() {
     async function loadOrganizations() {
       try {
         const page = await organizationsApi.search({ size: 50 });
-        setOrganizations(page.content);
-        if (page.content.length) setOrganizationId(String(page.content[0].id));
+        let availableOrgs = page.content;
+        
+        if (user.role !== "SUPER_ADMIN" && user.organizationId) {
+          availableOrgs = availableOrgs.filter(org => org.id === user.organizationId);
+        }
+        
+        setOrganizations(availableOrgs);
+        if (availableOrgs.length) setOrganizationId(String(availableOrgs[0].id));
       } catch (err) {
         setError(apiError(err));
       }
