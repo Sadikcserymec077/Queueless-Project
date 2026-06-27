@@ -1,86 +1,113 @@
-# QueueLess AI
+<div align="center">
+  
+  # 🚀 QueueLess AI
+  
+  **Next-Generation Multi-Tenant Queue & Appointment Management Platform**
 
-QueueLess AI is a production-ready full-stack starter for smart queue and appointment management. It includes JWT authentication, role-based dashboards, virtual token booking, QR token verification, email notification hooks, STOMP WebSocket queue updates, analytics, and MySQL persistence.
+  [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3-6DB33F?style=flat-square&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
+  [![React](https://img.shields.io/badge/React-18.3-61DAFB?style=flat-square&logo=react&logoColor=black)](https://reactjs.org/)
+  [![Vite](https://img.shields.io/badge/Vite-5.0-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
+  [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-## Project Structure
+  <p align="center">
+    QueueLess AI eliminates physical waiting lines by offering real-time, digital token booking across Hospitals, Banks, Colleges, and Government Offices.
+  </p>
+</div>
 
-```text
-backend/   Spring Boot REST API, WebSocket, JPA, JWT, mail, QR generation
-frontend/  React + React Router + Axios + Bootstrap + Chart.js application
-docs/      API reference and ER diagram
+---
+
+## ✨ Key Features
+
+- 🏢 **Multi-Tenant Architecture**: A single global account gives users access to book tokens across any registered organization.
+- ⚡ **Real-Time WebSockets**: Live queue updates, token status changes, and instant notifications pushed directly to the frontend.
+- 🔐 **Robust Security**: JWT-based stateless authentication, BCrypt password hashing, and role-based access control (RBAC).
+- ✉️ **Integrated SMTP Notifications**: Automated email verification, password reset flows, and branded welcomes.
+- 📊 **Advanced Analytics Dashboard**: Wait-time predictions, historical queue data, and operational metrics for administrators.
+- 📱 **Mobile-First UI**: Responsive, glassmorphism-inspired React frontend built for optimal mobile and desktop experiences.
+- 🛡️ **Rate Limiting**: Enforced booking limits (max 2 daily tokens) via UTC window validation to prevent spam.
+
+## 🛠️ Technology Stack
+
+| Component | Technology |
+| --- | --- |
+| **Frontend** | React 18, Vite, React Router DOM, Axios, Vanilla CSS (Glassmorphism UI) |
+| **Backend** | Java 17, Spring Boot 3.3.5, Spring Security, Spring Data JPA |
+| **Database** | MySQL 8.0, Hibernate ORM |
+| **Real-Time** | Spring WebSocket (STOMP), SockJS |
+| **Authentication** | JSON Web Tokens (JWT) |
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Java 17+**
+- **Node.js 18+**
+- **MySQL 8.0**
+- **Maven 3.8+**
+
+### Local Setup
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/Sadikcserymec077/Queueless-Project.git
+cd Queueless-Project
 ```
 
-## Prerequisites
+**2. Database Configuration**
+Create a MySQL database named `queueless_ai`.
 
-- Java 17+
-- Maven 3.9+
-- Node.js 18+
-- MySQL 8+
+**3. Backend Configuration (`backend/src/main/resources/application.yml`)**
+Set your environment variables or update the file with your local credentials:
+```yaml
+DB_USERNAME: root
+DB_PASSWORD: your_password
+MAIL_PASSWORD: your_google_app_password
+JWT_SECRET: your_secure_jwt_secret_key
+```
 
-## Backend Setup
-
-Create a MySQL database user or use the defaults in `backend/src/main/resources/application.yml`.
-
-```powershell
+**4. Start the Backend**
+```bash
 cd backend
-$env:DB_URL="jdbc:mysql://localhost:3306/queueless_ai?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
-$env:DB_USERNAME="root"
-$env:DB_PASSWORD="Password"
-$env:JWT_SECRET="replace-with-a-long-production-secret-at-least-32-chars"
 mvn spring-boot:run
 ```
+*The API will start at `http://localhost:8081`.*
 
-The API runs on `http://localhost:8081` by default. Swagger UI is available at `http://localhost:8081/swagger-ui.html`.
-Set `SERVER_PORT=8080` if you want the conventional Spring Boot port and it is free.
-
-Demo seeding is enabled by default:
-
-- Admin: `admin@queueless.ai` / `admin123`
-- User: `user@queueless.ai` / `user123`
-
-Set `SEED_DEMO_DATA=false` in production.
-
-## Frontend Setup
-
-```powershell
+**5. Start the Frontend**
+```bash
 cd frontend
 npm install
-npm run dev
+npm run dev -- --port 5555
 ```
+*The web app will start at `http://localhost:5555`.*
 
-The UI runs on `http://localhost:5009`.
+## 🧑‍💻 Usage & Roles
 
-Optional frontend API override:
+The system automatically seeds a set of demo users and organizations if `app.seed.enabled` is true.
 
-```powershell
-$env:VITE_API_URL="http://localhost:8081/api"
-```
+- **Super Admin** (`superadmin@queueless.ai`): Can create organizations, view global analytics, and manage ORG_ADMINs.
+- **Org Admin** (`admin@citycare.example`): Can add staff/doctors, create counters, and monitor queues for their specific organization.
+- **User** (`user@queueless.ai`): Can browse organizations, book digital tokens, and track real-time queue position.
 
-## Notifications
+## 🔒 Security Architecture
 
-Email notification persistence is always enabled. SMTP sending is disabled by default so local development can run without a mail server.
+- **Stateless Sessions**: JWT tokens are passed via `Bearer` headers.
+- **Method-Level Security**: `@PreAuthorize` restricts endpoint execution to specific roles (`hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN')`).
+- **Data Isolation**: Organizations can only view and mutate their own counters and tokens. Global users can interact across tenants.
 
-Enable SMTP with:
+## 🤝 Contributing
 
-```powershell
-$env:EMAIL_NOTIFICATIONS_ENABLED="true"
-$env:MAIL_HOST="smtp.example.com"
-$env:MAIL_PORT="587"
-$env:MAIL_USERNAME="..."
-$env:MAIL_PASSWORD="..."
-$env:MAIL_SMTP_AUTH="true"
-$env:MAIL_STARTTLS_ENABLE="true"
-```
+Contributions are always welcome! Please follow standard GitHub flow:
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## WebSocket Topics
+## 📝 License
 
-- Endpoint: `ws://localhost:8081/ws`
-- Counter queue updates: `/topic/counters/{counterId}`
-- Global queue updates: `/topic/queues`
-- User updates: `/topic/users/{userId}`
+Distributed under the MIT License. See `LICENSE` for more information.
 
-## Documentation
-
-- [API Reference](docs/API.md)
-- [ER Diagram](docs/ER_DIAGRAM.md)
-- [MySQL Schema](backend/src/main/resources/schema.sql)
+---
+<div align="center">
+  <i>Built with ❤️ for a Queue-less world.</i>
+</div>
