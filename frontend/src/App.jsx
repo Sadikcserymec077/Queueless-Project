@@ -19,6 +19,7 @@ import QueueMonitoring from "./pages/admin/QueueMonitoring.jsx";
 import AnalyticsDashboard from "./pages/admin/AnalyticsDashboard.jsx";
 import UserManagement from "./pages/admin/UserManagement.jsx";
 import AIChatbot from "./components/AIChatbot.jsx";
+import GlobalListener from "./components/GlobalListener.jsx";
 
 export default function App() {
   return (
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <AIChatbot />
+        <GlobalListener />
       </main>
     </>
   );
