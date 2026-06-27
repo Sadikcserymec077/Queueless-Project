@@ -17,6 +17,7 @@ public class TokenDtos {
             String tokenNumber,
             Long userId,
             String userName,
+            String userPhone,
             Long counterId,
             String counterName,
             Long organizationId,
@@ -46,6 +47,7 @@ public class TokenDtos {
             String organizationName,
             TokenResponse currentToken,
             List<TokenResponse> waitingTokens,
+            List<TokenResponse> skippedTokens,
             long waitingCount
     ) {
     }

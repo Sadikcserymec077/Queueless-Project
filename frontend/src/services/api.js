@@ -78,6 +78,8 @@ export const tokensApi = {
   callNext: (counterId) => unwrap(client.post(`/tokens/counters/${counterId}/call-next`)),
   complete: (id) => unwrap(client.patch(`/tokens/${id}/complete`)),
   skip: (id) => unwrap(client.patch(`/tokens/${id}/skip`)),
+  requeue: (id) => unwrap(client.patch(`/tokens/${id}/requeue`)),
+  requestCancel: (id) => unwrap(client.post(`/tokens/${id}/request-cancel`)),
   verifyQr: (qrPayload) => unwrap(client.post("/tokens/verify-qr", { qrPayload }))
 };
 

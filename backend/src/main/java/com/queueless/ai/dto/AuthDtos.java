@@ -9,7 +9,8 @@ public class AuthDtos {
     public record RegisterRequest(
             @NotBlank String name,
             @Email @NotBlank String email,
-            @Size(min = 6, max = 80) String password
+            @Size(min = 6, max = 80) String password,
+            String phone
     ) {
     }
 
@@ -34,6 +35,7 @@ public class AuthDtos {
             Long id,
             String name,
             String email,
+            String phone,
             Role role,
             boolean enabled,
             Long organizationId,

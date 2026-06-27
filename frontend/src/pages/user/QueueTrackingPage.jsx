@@ -31,11 +31,12 @@ export default function QueueTrackingPage() {
     return subscribeToCounter(active.counterId, load);
   }, [active?.counterId, load]);
 
-  const cancel = async () => {
+  const requestCancel = async () => {
     if (!active) return;
+    if (!confirm("Are you sure you want to request cancellation for this token?")) return;
     try {
-      await tokensApi.cancel(active.id);
-      await load();
+      await tokensApi.requestCancel(active.id);
+      alert("Cancellation request sent to the organization.");
     } catch (err) {
       setError(apiError(err));
     }
@@ -63,7 +64,7 @@ export default function QueueTrackingPage() {
             <div><span>Estimated wait</span><strong>{minutesLabel(status?.estimatedWaitingTimeMinutes)}</strong></div>
             <div><span>Expected turn</span><strong>{formatDate(status?.expectedTurnTime)}</strong></div>
           </div>
-          <button className="danger-action" type="button" onClick={cancel}><XCircle size={18} /> Cancel token</button>
+          <button className="danger-action" type="button" onClick={requestCancel}><XCircle size={18} /> Request Cancel</button>
         </>
       )}
     </section>

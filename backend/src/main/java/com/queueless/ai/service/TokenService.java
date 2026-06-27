@@ -159,6 +159,20 @@ public class TokenService {
         return toResponse(token);
     }
 
+    @Transactional(readOnly = true)
+    public void requestCancel(Long tokenId, Long userId) {
+        Token token = find(tokenId);
+        if (!token.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Token does not belong to current user");
+        }
+        if (token.getStatus() != TokenStatus.WAITING) {
+            throw new BadRequestException("Can only request cancellation for waiting tokens");
+        }
+        
+        queueEventPublisher.publishCounterUpdate(token.getCounter().getId(), 
+            java.util.Map.of("type", "CANCEL_REQUEST", "token", toResponse(token)));
+    }
+
     @Transactional
     public TokenResponse callNext(Long counterId) {
         Counter counter = counterService.find(counterId);
@@ -208,6 +222,20 @@ public class TokenService {
         return toResponse(token);
     }
 
+    @Transactional
+    public TokenResponse requeue(Long tokenId) {
+        Token token = find(tokenId);
+        if (token.getStatus() != TokenStatus.SKIPPED) {
+            throw new BadRequestException("Only skipped tokens can be re-queued");
+        }
+        token.setStatus(TokenStatus.WAITING);
+        token.setBookingTime(Instant.now());
+        notificationService.notifyUser(token.getUser(), "Token re-queued", "Your token " + token.getTokenNumber() + " has been added back to the queue.");
+        publishQueue(token.getCounter().getId());
+        queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
+        return toResponse(token);
+    }
+
     @Transactional(readOnly = true)
     public AdminQueueResponse getCounterQueue(Long counterId) {
         Counter counter = counterService.find(counterId);
@@ -218,12 +246,17 @@ public class TokenService {
                 .stream()
                 .map(this::toResponse)
                 .toList();
+        List<TokenResponse> skipped = tokenRepository.findTop20ByCounterIdAndStatusOrderByBookingTimeAsc(counterId, TokenStatus.SKIPPED)
+                .stream()
+                .map(this::toResponse)
+                .toList();
         return new AdminQueueResponse(
                 counter.getId(),
                 counter.getCounterName(),
                 counter.getOrganization().getName(),
                 current,
                 waiting,
+                skipped,
                 tokenRepository.countByCounterIdAndStatus(counterId, TokenStatus.WAITING)
         );
     }
@@ -291,6 +324,7 @@ public class TokenService {
                 token.getTokenNumber(),
                 token.getUser().getId(),
                 token.getUser().getName(),
+                token.getUser().getPhone(),
                 token.getCounter().getId(),
                 token.getCounter().getCounterName(),
                 token.getCounter().getOrganization().getId(),
@@ -316,8 +350,8 @@ public class TokenService {
         Instant start = date.atStartOfDay().toInstant(ZoneOffset.UTC);
         Instant end = date.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
         long sequence = tokenRepository.countByCounterIdAndBookingTimeBetween(counter.getId(), start, end) + 1;
-        return "QL-" + date.format(DateTimeFormatter.BASIC_ISO_DATE) + "-O" + counter.getOrganization().getId() + "-C" + counter.getCounterNumber() + "-"
-                + String.format("%03d", sequence);
+        String orgPrefix = counter.getOrganization().getName().replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
+        return orgPrefix + "-C" + counter.getId() + "-" + String.format("%03d", sequence);
     }
 
     private void publishQueue(Long counterId) {

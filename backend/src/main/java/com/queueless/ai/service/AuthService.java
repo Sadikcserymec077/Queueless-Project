@@ -42,6 +42,7 @@ public class AuthService {
                 .name(request.name().trim())
                 .email(request.email().trim().toLowerCase())
                 .password(passwordEncoder.encode(request.password()))
+                .phone(request.phone() != null ? request.phone().trim() : null)
                 .role(Role.USER)
                 .emailVerificationToken(UUID.randomUUID().toString())
                 .build();
@@ -78,7 +79,7 @@ public class AuthService {
     public UserResponse toUserResponse(User user) {
         Long orgId = user.getOrganization() != null ? user.getOrganization().getId() : null;
         String orgName = user.getOrganization() != null ? user.getOrganization().getName() : null;
-        return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.isEnabled(), orgId, orgName);
+        return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getRole(), user.isEnabled(), orgId, orgName);
     }
 
     @Transactional

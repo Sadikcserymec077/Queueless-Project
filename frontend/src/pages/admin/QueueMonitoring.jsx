@@ -60,7 +60,15 @@ export default function QueueMonitoring() {
 
   useEffect(() => {
     if (!counterId) return undefined;
-    return subscribeToCounter(counterId, setQueue);
+    return subscribeToCounter(counterId, (message) => {
+      if (message.type === "CANCEL_REQUEST") {
+        if (confirm(`User ${message.token.userName} (${message.token.tokenNumber}) requested to cancel their token. Approve cancellation?`)) {
+          tokensApi.cancel(message.token.id).then(() => loadQueue());
+        }
+      } else {
+        setQueue(message);
+      }
+    });
   }, [counterId]);
 
   const action = async (fn) => {
@@ -101,12 +109,13 @@ export default function QueueMonitoring() {
         <h2>Waiting tokens</h2>
         <div className="table-responsive">
           <table>
-            <thead><tr><th>Token</th><th>User</th><th>Position</th><th>Estimate</th><th>Status</th><th>Booked</th></tr></thead>
+            <thead><tr><th>Token</th><th>User</th><th>Phone</th><th>Position</th><th>Estimate</th><th>Status</th><th>Booked</th></tr></thead>
             <tbody>
               {(queue?.waitingTokens || []).map((token) => (
                 <tr key={token.id}>
                   <td>{token.tokenNumber}</td>
                   <td>{token.userName}</td>
+                  <td>{token.userPhone || "-"}</td>
                   <td>{token.queuePosition}</td>
                   <td>{token.estimatedWaitTimeMinutes} min</td>
                   <td><StatusPill value={token.status} /></td>
@@ -117,6 +126,32 @@ export default function QueueMonitoring() {
           </table>
         </div>
       </section>
+
+      {(queue?.skippedTokens?.length > 0) && (
+        <section className="data-section" style={{ marginTop: "2rem" }}>
+          <h2>Skipped tokens (Late / Absent)</h2>
+          <div className="table-responsive">
+            <table>
+              <thead><tr><th>Token</th><th>User</th><th>Phone</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>
+                {queue.skippedTokens.map((token) => (
+                  <tr key={token.id}>
+                    <td>{token.tokenNumber}</td>
+                    <td>{token.userName}</td>
+                    <td>{token.userPhone || "-"}</td>
+                    <td><StatusPill value={token.status} /></td>
+                    <td>
+                      <button className="secondary-action" type="button" onClick={() => action(() => tokensApi.requeue(token.id))}>
+                        Re-queue at end
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </section>
   );
 }

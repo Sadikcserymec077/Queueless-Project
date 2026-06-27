@@ -41,7 +41,7 @@ public class OrganizationUserManagementService {
         targetUser.setEmailVerified(true);
         
         targetUser = userRepository.save(targetUser);
-        return new UserResponse(targetUser.getId(), targetUser.getName(), targetUser.getEmail(), targetUser.getRole(), targetUser.isEnabled(), targetUser.getOrganization() != null ? targetUser.getOrganization().getId() : null, targetUser.getOrganization() != null ? targetUser.getOrganization().getName() : null);
+        return new UserResponse(targetUser.getId(), targetUser.getName(), targetUser.getEmail(), targetUser.getPhone(), targetUser.getRole(), targetUser.isEnabled(), targetUser.getOrganization() != null ? targetUser.getOrganization().getId() : null, targetUser.getOrganization() != null ? targetUser.getOrganization().getName() : null);
     }
 
     @Transactional(readOnly = true)
@@ -56,7 +56,7 @@ public class OrganizationUserManagementService {
         
         return userRepository.findAll().stream()
                 .filter(u -> u.getOrganization() != null && u.getOrganization().getId().equals(adminOrg.getId()))
-                .map(u -> new UserResponse(u.getId(), u.getName(), u.getEmail(), u.getRole(), u.isEnabled(), u.getOrganization() != null ? u.getOrganization().getId() : null, u.getOrganization() != null ? u.getOrganization().getName() : null))
+                .map(u -> new UserResponse(u.getId(), u.getName(), u.getEmail(), u.getPhone(), u.getRole(), u.isEnabled(), u.getOrganization() != null ? u.getOrganization().getId() : null, u.getOrganization() != null ? u.getOrganization().getName() : null))
                 .toList();
     }
 
@@ -80,6 +80,6 @@ public class OrganizationUserManagementService {
         targetUser.setOrganization(null);
         targetUser.setRole(Role.USER); // Reset role
         targetUser = userRepository.save(targetUser);
-        return new UserResponse(targetUser.getId(), targetUser.getName(), targetUser.getEmail(), targetUser.getRole(), targetUser.isEnabled(), targetUser.getOrganization() != null ? targetUser.getOrganization().getId() : null, targetUser.getOrganization() != null ? targetUser.getOrganization().getName() : null);
+        return new UserResponse(targetUser.getId(), targetUser.getName(), targetUser.getEmail(), targetUser.getPhone(), targetUser.getRole(), targetUser.isEnabled(), targetUser.getOrganization() != null ? targetUser.getOrganization().getId() : null, targetUser.getOrganization() != null ? targetUser.getOrganization().getName() : null);
     }
 }

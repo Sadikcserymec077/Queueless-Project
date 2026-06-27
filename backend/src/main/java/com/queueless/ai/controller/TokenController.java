@@ -92,6 +92,19 @@ public class TokenController {
         return ApiResponse.success("Token skipped", tokenService.skip(id));
     }
 
+    @PatchMapping("/{id}/requeue")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN', 'SUB_ADMIN', 'STAFF', 'DOCTOR')")
+    public ApiResponse<TokenResponse> requeue(@PathVariable Long id) {
+        return ApiResponse.success("Token re-queued", tokenService.requeue(id));
+    }
+
+    @PostMapping("/{id}/request-cancel")
+    @PreAuthorize("hasRole('USER')")
+    public ApiResponse<Void> requestCancel(@PathVariable Long id) {
+        tokenService.requestCancel(id, SecurityUtils.currentUser().getId());
+        return ApiResponse.success("Cancellation request sent to organization", null);
+    }
+
     @PostMapping("/verify-qr")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN', 'SUB_ADMIN', 'STAFF', 'DOCTOR')")
     public ApiResponse<TokenResponse> verifyQr(@Valid @RequestBody QrVerificationRequest request) {
