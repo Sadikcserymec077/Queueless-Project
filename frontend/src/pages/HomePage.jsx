@@ -29,7 +29,9 @@ export default function HomePage() {
   }, [q, type]);
 
   return (
-    <section className="page-stack">
+    <>
+      <div className="home-bg" />
+      <section className="page-stack">
       <div className="home-hero">
         <div>
           <p className="eyebrow">Smart Queue and Appointment Management</p>
@@ -77,5 +79,6 @@ export default function HomePage() {
         </div>
       )}
     </section>
+    </>
   );
 }

@@ -175,17 +175,28 @@ th {
 
 .home-hero {
   align-items: center;
-  min-height: 400px;
+  min-height: 200px;
   padding: 3rem 2rem;
   border-radius: var(--radius);
-  background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.9)), url('/hero-bg.png');
-  background-size: cover;
-  background-position: center;
-  border: 1px solid var(--line);
+  background: transparent;
+  border: none;
   color: var(--ink);
   text-align: center;
   flex-direction: column;
   justify-content: center;
+}
+
+.home-bg {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.95)), url('/hero-bg.png');
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .home-hero h1,
