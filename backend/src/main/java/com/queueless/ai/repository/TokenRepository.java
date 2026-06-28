@@ -74,10 +74,10 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
               and (:from is null or t.bookingTime >= :from)
               and (:to is null or t.bookingTime <= :to)
               and (
-                    :q is null
-                    or lower(t.tokenNumber) like lower(concat('%', :q, '%'))
-                    or lower(t.user.name) like lower(concat('%', :q, '%'))
-                    or lower(t.counter.organization.name) like lower(concat('%', :q, '%'))
+                    cast(:q as String) is null
+                    or lower(t.tokenNumber) like lower(concat('%', cast(:q as String), '%'))
+                    or lower(t.user.name) like lower(concat('%', cast(:q as String), '%'))
+                    or lower(t.counter.organization.name) like lower(concat('%', cast(:q as String), '%'))
               )
             """)
     Page<Token> searchAdmin(

@@ -12,7 +12,7 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
 
     @Query("""
             select o from Organization o
-            where (:q is null or lower(o.name) like lower(concat('%', :q, '%')))
+            where (cast(:q as String) is null or lower(o.name) like lower(concat('%', cast(:q as String), '%')))
               and (:type is null or o.type = :type)
               and (:includeInactive = true or o.active = true)
             """)
