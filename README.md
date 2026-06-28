@@ -24,6 +24,7 @@
 ## 📸 Screenshots
 
 **🏠 Home Page & Organization Discovery**
+![Home Page & Organization Discovery](docs/dashboard-screenshot.png)
 > *(Search across hospitals, banks, and public offices in a clean, glassmorphism UI)*
 
 **📱 User Dashboard & Live Queue Tracker**
