@@ -109,7 +109,7 @@ export default function BookTokenPage() {
         key: orderResponse.razorpayKeyId,
         amount: orderResponse.finalAmount * 100, // paise
         currency: "INR",
-        name: "QueueLess AI",
+        name: "Q-Smart",
         description: `Booking for ${selectedCounter.counterName}`,
         order_id: orderResponse.razorpayOrderId,
         handler: async function (response) {

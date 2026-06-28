@@ -8,7 +8,7 @@ const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 export default function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: "assistant", text: "Hi! I'm the QueueLess AI Assistant. How can I help you today?" }
+    { role: "assistant", text: "Hi! I'm the Q-Smart Assistant. How can I help you today?" }
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +34,7 @@ export default function AIChatbot() {
       // Use Gemini 1.5 Flash (the recommended model for chat)
       const model = genAI.getGenerativeModel({ 
         model: "gemini-1.5-flash",
-        systemInstruction: "You are the QueueLess AI Assistant. You help users navigate the QueueLess platform, which allows them to book virtual tokens for hospitals, banks, and government offices to skip physical lines. Be helpful, concise, and polite."
+        systemInstruction: "You are the Q-Smart Assistant. You help users navigate the Q-Smart platform, which allows them to book virtual tokens for hospitals, banks, and government offices to skip physical lines. Be helpful, concise, and polite."
       });
 
       // Prepare chat history format for Gemini
@@ -56,21 +56,21 @@ export default function AIChatbot() {
       // Fallback Simulated AI (so the UI still works even if the API Key is invalid)
       setTimeout(() => {
         const lower = userMessage.toLowerCase();
-        let fallbackText = "I'm the QueueLess AI Assistant! I can help you navigate this platform to book tokens, track your queue, and cancel appointments.";
+        let fallbackText = "I'm the Q-Smart Assistant! I can help you navigate this platform to book tokens, track your queue, and cancel appointments.";
         
         // Greeting
         if (/^(hi|hello|hey|howdy|greetings)\b/i.test(lower)) {
-          fallbackText = "Hello there! How can I assist you with the QueueLess platform today?";
+          fallbackText = "Hello there! How can I assist you with the Q-Smart platform today?";
         } 
         // Identity
         else if (lower.includes("website") || lower.includes("webiste") || lower.includes("tell me about") || lower.includes("what is queueless")) {
-          fallbackText = "This is QueueLess AI, a smart token management system! It allows users to book virtual tokens for hospitals, banks, and government offices so you don't have to wait in physical lines. You can track your queue status in real-time!";
+          fallbackText = "This is Q-Smart, a smart token management system! It allows users to book virtual tokens for hospitals, banks, and government offices so you don't have to wait in physical lines. You can track your queue status in real-time!";
         }
         else if (lower.includes("how are you") || lower.includes("how do you do")) {
           fallbackText = "I'm just a virtual assistant, but I'm doing great! Ready to help you skip the queue. What do you need help with?";
         }
         else if (lower.includes("who are you") || lower.includes("your name")) {
-          fallbackText = "I'm the QueueLess AI Assistant. I'm here to guide you through booking and managing your virtual tokens.";
+          fallbackText = "I'm the Q-Smart Assistant. I'm here to guide you through booking and managing your virtual tokens.";
         }
         // Booking
         else if (lower.includes("book") || lower.includes("new token") || lower.includes("create token") || lower.includes("appointment")) {
@@ -90,7 +90,7 @@ export default function AIChatbot() {
         } 
         // Generic fallback
         else {
-          fallbackText = "I'm sorry, I didn't quite catch that. As the QueueLess AI, I can help you with booking tokens, tracking your queue status, canceling, or letting the receptionist know you are running late. Try asking me 'How do I book a token?'";
+          fallbackText = "I'm sorry, I didn't quite catch that. As the Q-Smart Assistant, I can help you with booking tokens, tracking your queue status, canceling, or letting the receptionist know you are running late. Try asking me 'How do I book a token?'";
         }
         
         setMessages(prev => [...prev, { role: "assistant", text: fallbackText }]);
@@ -155,7 +155,7 @@ export default function AIChatbot() {
             fontWeight: "600"
           }}>
             <Bot size={20} />
-            QueueLess AI Assistant
+            Q-Smart Assistant
           </div>
 
           {/* Messages Area */}

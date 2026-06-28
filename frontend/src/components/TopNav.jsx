@@ -38,8 +38,8 @@ export default function TopNav() {
   return (
     <header className="top-nav">
       <Link to="/" className="brand">
-        <span>QL</span>
-        QueueLess AI
+        <span>QS</span>
+        Q-Smart
       </Link>
       <button className="icon-button nav-toggle" type="button" onClick={() => setOpen((value) => !value)} aria-label="Toggle navigation">
         <Menu size={20} />

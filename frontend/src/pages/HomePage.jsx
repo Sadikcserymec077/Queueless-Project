@@ -33,7 +33,7 @@ export default function HomePage() {
       <div className="home-hero">
         <div>
           <p className="eyebrow">Smart Queue and Appointment Management</p>
-          <h1>QueueLess AI</h1>
+          <h1>Q-Smart</h1>
           <p className="lead-text">Book a virtual token, watch live queue movement, and arrive when your turn is close.</p>
         </div>
         <div className="hero-actions">
