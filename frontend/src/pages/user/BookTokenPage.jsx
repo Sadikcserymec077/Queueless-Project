@@ -79,9 +79,16 @@ export default function BookTokenPage() {
               </div>
             </div>
             <h2 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Booking Confirmed!</h2>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Your Token Number is <strong style={{color: 'var(--text-primary)', fontSize: '1.1rem'}}>{booked.tokenNumber}</strong>.</p>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>Your Token Number is <strong style={{color: 'var(--text-primary)', fontSize: '1.1rem'}}>{booked.tokenNumber}</strong>.</p>
+            
+            {booked.qrCodeData && (
+              <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                <img src={booked.qrCodeData} alt="QR Code" style={{ width: '200px', height: '200px', objectFit: 'contain', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.5rem' }} />
+              </div>
+            )}
+
             <button className="primary-action" onClick={() => navigate("/user/track")} style={{ width: '100%', padding: '0.75rem', justifyContent: 'center' }}>
-              Acknowledge & View QR
+              Acknowledge & Track Queue
             </button>
           </div>
         </div>
