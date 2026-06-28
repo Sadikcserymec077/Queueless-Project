@@ -32,6 +32,9 @@ public class AuthService {
     private final JwtService jwtService;
     private final NotificationService notificationService;
 
+    @org.springframework.beans.factory.annotation.Value("${app.frontend.url:http://localhost:5555}")
+    private String frontendUrl;
+
     @Transactional
     public UserResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
@@ -50,7 +53,7 @@ public class AuthService {
         User saved = userRepository.save(user);
         
         try {
-            String verifyUrl = "http://localhost:5555/verify-email?token=" + saved.getEmailVerificationToken();
+            String verifyUrl = frontendUrl + "/verify-email?token=" + saved.getEmailVerificationToken();
             notificationService.notifyUser(saved, "Verify your email - QueueLess AI", "Hi " + saved.getName() + ",\n\nWelcome to QueueLess AI! Please verify your email by clicking the link below:\n\n" + verifyUrl + "\n\nBest Regards,\nQueueLess AI Team");
         } catch (Exception e) {
             // Ignore email errors so registration still succeeds
@@ -98,7 +101,7 @@ public class AuthService {
         user.setPasswordResetTokenExpiry(Instant.now().plus(1, ChronoUnit.HOURS));
 
         try {
-            String resetUrl = "http://localhost:5555/reset-password?token=" + user.getPasswordResetToken();
+            String resetUrl = frontendUrl + "/reset-password?token=" + user.getPasswordResetToken();
             notificationService.notifyUser(user, "Password Reset Request", "Hi " + user.getName() + ",\n\nYou requested a password reset. Click the link below to set a new password:\n\n" + resetUrl + "\n\nIf you did not request this, please ignore this email.\n\nBest Regards,\nQueueLess AI Team");
         } catch (Exception e) {
             // Ignore email errors
