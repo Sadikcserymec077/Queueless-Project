@@ -1,12 +1,13 @@
 import { CalendarPlus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import StatusPill from "../../components/StatusPill.jsx";
 import TokenCard from "../../components/TokenCard.jsx";
 import { countersApi, organizationsApi, tokensApi } from "../../services/api.js";
 import { apiError } from "../../utils/format.js";
 
 export default function BookTokenPage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialOrgId = searchParams.get("orgId") || "";
 
@@ -69,7 +70,22 @@ export default function BookTokenPage() {
       </div>
 
       {error ? <div className="alert alert-warning">{error}</div> : null}
-      {booked ? <TokenCard token={booked} /> : null}
+      {booked ? (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: 'var(--bg-card)', padding: '2rem', borderRadius: '12px', maxWidth: '400px', width: '90%', textAlign: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+              <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'var(--success-bg, #e6f6ec)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--success-text, #0f5132)' }}>
+                <CalendarPlus size={32} />
+              </div>
+            </div>
+            <h2 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Booking Confirmed!</h2>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Your Token Number is <strong style={{color: 'var(--text-primary)', fontSize: '1.1rem'}}>{booked.tokenNumber}</strong>.</p>
+            <button className="primary-action" onClick={() => navigate("/user/track")} style={{ width: '100%', padding: '0.75rem', justifyContent: 'center' }}>
+              Acknowledge & View QR
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <div className="toolbar">
         <label className="search-box"><Search size={18} /><input value={q} onChange={(event) => setQ(event.target.value)} placeholder="Search organization" /></label>
