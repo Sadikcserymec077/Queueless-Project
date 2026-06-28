@@ -34,6 +34,7 @@
 > *(Real-time wait times, current position, and dynamic progress bars)*
 
 **📊 Super Admin Analytics Dashboard**
+![Super Admin Dashboard](docs/super-admin-dashboard.png)
 > *(Global metrics, organization health, and multi-tenant management)*
 
 ---
