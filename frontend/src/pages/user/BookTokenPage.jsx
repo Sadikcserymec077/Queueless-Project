@@ -61,7 +61,7 @@ export default function BookTokenPage() {
     setPatientCount(1);
     setBooked(null);
     setError("");
-    
+
     try {
       const dates = await countersApi.availableDates(counter.id);
       setAvailableDates(dates.map(d => new Date(d)));
@@ -80,8 +80,8 @@ export default function BookTokenPage() {
     if (!selectedCounter) return;
     setError("");
     setIsProcessing(true);
-    const formattedDate = selectedDate ? 
-      `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}` 
+    const formattedDate = selectedDate ?
+      `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
       : null;
     // Fast-path: If the counter is totally free (no booking fee), skip Razorpay
     // Actually, our requirement is to always show Razorpay for payment.
@@ -96,8 +96,8 @@ export default function BookTokenPage() {
       if (orderResponse.finalAmount === 0) {
         // Free booking!
         const token = await tokensApi.book({
-            counterId: selectedCounter.id,
-            scheduledDate: formattedDate
+          counterId: selectedCounter.id,
+          scheduledDate: formattedDate
         });
         setBooked(token);
         setIsProcessing(false);
@@ -189,7 +189,7 @@ export default function BookTokenPage() {
             ) : (
               <div>
                 <h2 style={{ marginTop: 0, marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Book for {selectedCounter.counterName}</h2>
-                
+
                 <div style={{ marginBottom: '1.5rem' }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Schedule Date</label>
                   {availableDates.length > 0 ? (
@@ -210,17 +210,17 @@ export default function BookTokenPage() {
                 </div>
 
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Number of Patients</label>
-                  <select 
-                    className="form-control" 
-                    value={patientCount} 
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Number of Members</label>
+                  <select
+                    className="form-control"
+                    value={patientCount}
                     onChange={e => setPatientCount(Number(e.target.value))}
                   >
-                    <option value="1">1 Patient</option>
-                    <option value="2">2 Patients (30% Discount)</option>
-                    <option value="3">3 Patients (40% Discount)</option>
-                    <option value="4">4 Patients (40% Discount)</option>
-                    <option value="5">5 Patients (40% Discount)</option>
+                    <option value="1">1 Member</option>
+                    <option value="2">2 Members</option>
+                    <option value="3">3 Members</option>
+                    <option value="4">4 Members</option>
+                    <option value="5">5 Members</option>
                   </select>
                 </div>
 
@@ -230,7 +230,7 @@ export default function BookTokenPage() {
                     <span>₹{selectedCounter.bookingFee} / person</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span>Total Patients:</span>
+                    <span>Total Members:</span>
                     <span>x {patientCount}</span>
                   </div>
                   {patientCount > 1 && (
@@ -245,9 +245,9 @@ export default function BookTokenPage() {
                   </div>
                 </div>
 
-                <button 
-                  className="primary-action" 
-                  onClick={handleProceedToPay} 
+                <button
+                  className="primary-action"
+                  onClick={handleProceedToPay}
                   disabled={isProcessing}
                   style={{ width: '100%', justifyContent: 'center' }}
                 >
@@ -304,10 +304,10 @@ export default function BookTokenPage() {
             </dl>
             <div className="entity-actions">
               <StatusPill value={counter.status} />
-              <button 
-                className="primary-action" 
-                disabled={counter.status !== "ACTIVE"} 
-                type="button" 
+              <button
+                className="primary-action"
+                disabled={counter.status !== "ACTIVE"}
+                type="button"
                 onClick={() => openCheckout(counter)}
               >
                 <CalendarPlus size={18} /> Book
