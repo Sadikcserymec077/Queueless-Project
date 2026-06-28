@@ -32,6 +32,8 @@ springdoc:
     path: /swagger-ui.html
 
 app:
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:5555}
   jwt:
     secret: ${JWT_SECRET:YOUR_SUPER_SECURE_JWT_SECRET_KEY_THAT_IS_LONG_ENOUGH_FOR_HS256}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
