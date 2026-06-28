@@ -40,6 +40,7 @@ export const authApi = {
   login: (payload) => unwrap(client.post("/auth/login", payload)),
   register: (payload) => unwrap(client.post("/auth/register", payload)),
   me: () => unwrap(client.get("/users/me")),
+  updateProfile: (payload) => unwrap(client.put("/users/me", payload)),
   verifyEmail: (token) => unwrap(client.post(`/auth/verify-email?token=${token}`)),
   forgotPassword: (payload) => unwrap(client.post("/auth/forgot-password", payload)),
   resetPassword: (payload) => unwrap(client.post("/auth/reset-password", payload))

@@ -31,6 +31,11 @@ public class AuthDtos {
     ) {
     }
 
+    public record UpdateProfileRequest(
+            String phone
+    ) {
+    }
+
     public record UserResponse(
             Long id,
             String name,

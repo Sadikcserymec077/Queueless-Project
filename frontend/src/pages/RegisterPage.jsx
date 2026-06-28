@@ -7,7 +7,7 @@ import { apiError } from "../utils/format.js";
 export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -53,6 +53,7 @@ export default function RegisterPage() {
         {error ? <div className="alert alert-danger">{error}</div> : null}
         <label>Name<input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
         <label>Email<input type="email" required value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></label>
+        <label>Phone Number (Optional)<input type="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} placeholder="e.g. +1234567890" /></label>
         <label>Password
           <div style={{ position: "relative" }}>
             <input type={showPassword ? "text" : "password"} minLength={6} required value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} style={{ width: "100%", paddingRight: "40px" }} />
