@@ -58,13 +58,21 @@ public class Counter {
     private List<LocalDate> availableDates = new ArrayList<>();
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "daily_capacity")
     private Integer dailyCapacity = 100;
 
     // --- Feature 2: Payment ---
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "booking_fee")
     private Double bookingFee = 0.0;
+    
+    public Integer getDailyCapacity() {
+        return dailyCapacity != null ? dailyCapacity : 100;
+    }
+    
+    public Double getBookingFee() {
+        return bookingFee != null ? bookingFee : 0.0;
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false)
