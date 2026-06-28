@@ -96,7 +96,7 @@ public class TokenService {
                 .paymentStatus(counter.getBookingFee() > 0 ? "PENDING" : "SUCCESS")
                 .build();
 
-        Token saved = tokenRepository.save(token);
+        Token saved = tokenRepository.saveAndFlush(token);
         
         notificationService.notifyUser(
                 user,
@@ -104,11 +104,18 @@ public class TokenService {
                 "Your token " + saved.getTokenNumber() + " has been booked for " + counter.getCounterName() + 
                 (request.scheduledDate() != null ? " on " + request.scheduledDate() : "") + "."
         );
-        publishQueue(counter.getId());
-        
-        if (request.scheduledDate() == null || request.scheduledDate().equals(today)) {
-            queueEventPublisher.publishUserUpdate(userId, getQueueStatus(saved.getId(), userId, false));
-        }
+
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    publishQueue(counter.getId());
+                    if (request.scheduledDate() == null || request.scheduledDate().equals(today)) {
+                        queueEventPublisher.publishUserUpdate(userId, getQueueStatus(saved.getId(), userId, false));
+                    }
+                }
+            }
+        );
         
         return toResponse(saved);
     }
@@ -182,8 +189,16 @@ public class TokenService {
         }
         token.setStatus(TokenStatus.CANCELLED);
         notificationService.notifyUser(token.getUser(), "Token cancelled: " + token.getTokenNumber(), "Token " + token.getTokenNumber() + " has been cancelled.");
-        publishQueue(token.getCounter().getId());
-        queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
+        
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    publishQueue(token.getCounter().getId());
+                    queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
+                }
+            }
+        );
         return toResponse(token);
     }
 
@@ -224,8 +239,16 @@ public class TokenService {
         token.setStatus(TokenStatus.WAITING);
         token.setBookingTime(Instant.now());
         notificationService.notifyUser(token.getUser(), "Token delayed: " + token.getTokenNumber(), "Your token " + token.getTokenNumber() + " has been moved to the end of the line.");
-        publishQueue(token.getCounter().getId());
-        queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
+        
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    publishQueue(token.getCounter().getId());
+                    queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
+                }
+            }
+        );
         return toResponse(token);
     }
 
@@ -252,8 +275,16 @@ public class TokenService {
                 "Your turn is ready: " + next.getTokenNumber(),
                 "Token " + next.getTokenNumber() + " is now being served at " + counter.getCounterName() + "."
         );
-        publishQueue(counterId);
-        queueEventPublisher.publishUserUpdate(next.getUser().getId(), getQueueStatus(next.getId(), next.getUser().getId(), false));
+        
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    publishQueue(counterId);
+                    queueEventPublisher.publishUserUpdate(next.getUser().getId(), getQueueStatus(next.getId(), next.getUser().getId(), false));
+                }
+            }
+        );
         return toResponse(next);
     }
 
@@ -266,8 +297,16 @@ public class TokenService {
         token.setStatus(TokenStatus.COMPLETED);
         token.setCompletedAt(Instant.now());
         notificationService.notifyUser(token.getUser(), "Service completed: " + token.getTokenNumber(), "Token " + token.getTokenNumber() + " has been completed.");
-        publishQueue(token.getCounter().getId());
-        queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
+        
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    publishQueue(token.getCounter().getId());
+                    queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
+                }
+            }
+        );
         return toResponse(token);
     }
 
@@ -279,8 +318,16 @@ public class TokenService {
         }
         token.setStatus(TokenStatus.SKIPPED);
         notificationService.notifyUser(token.getUser(), "Token skipped: " + token.getTokenNumber(), "Token " + token.getTokenNumber() + " was skipped.");
-        publishQueue(token.getCounter().getId());
-        queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
+        
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    publishQueue(token.getCounter().getId());
+                    queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
+                }
+            }
+        );
         return toResponse(token);
     }
 
@@ -293,8 +340,16 @@ public class TokenService {
         token.setStatus(TokenStatus.WAITING);
         token.setBookingTime(Instant.now());
         notificationService.notifyUser(token.getUser(), "Token re-queued: " + token.getTokenNumber(), "Your token " + token.getTokenNumber() + " has been added back to the queue.");
-        publishQueue(token.getCounter().getId());
-        queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
+        
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    publishQueue(token.getCounter().getId());
+                    queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
+                }
+            }
+        );
         return toResponse(token);
     }
 
