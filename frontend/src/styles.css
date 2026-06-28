@@ -175,10 +175,12 @@ th {
 
 .home-hero {
   align-items: center;
-  min-height: 200px;
+  min-height: 400px;
   padding: 3rem 2rem;
   border-radius: var(--radius);
-  background: var(--surface);
+  background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.9)), url('/hero-bg.png');
+  background-size: cover;
+  background-position: center;
   border: 1px solid var(--line);
   color: var(--ink);
   text-align: center;
