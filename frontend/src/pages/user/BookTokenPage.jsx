@@ -72,23 +72,17 @@ export default function BookTokenPage() {
       {error ? <div className="alert alert-warning">{error}</div> : null}
       {booked ? (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div style={{ backgroundColor: 'var(--bg-card)', padding: '2rem', borderRadius: '12px', maxWidth: '400px', width: '90%', textAlign: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
+          <div style={{ backgroundColor: '#ffffff', color: '#000000', padding: '2rem', borderRadius: '12px', maxWidth: '400px', width: '90%', textAlign: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-              <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'var(--success-bg, #e6f6ec)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--success-text, #0f5132)' }}>
+              <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#e6f6ec', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0f5132' }}>
                 <CalendarPlus size={32} />
               </div>
             </div>
-            <h2 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Booking Confirmed!</h2>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>Your Token Number is <strong style={{color: 'var(--text-primary)', fontSize: '1.1rem'}}>{booked.tokenNumber}</strong>.</p>
+            <h2 style={{ marginTop: 0, marginBottom: '0.5rem', color: '#1a1a1a' }}>Booking Confirmed!</h2>
+            <p style={{ color: '#666666', marginBottom: '1.5rem' }}>Your Token Number is <strong style={{color: '#000000', fontSize: '1.1rem'}}>{booked.tokenNumber}</strong>.</p>
             
-            {booked.qrCodeData && (
-              <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
-                <img src={booked.qrCodeData} alt="QR Code" style={{ width: '200px', height: '200px', objectFit: 'contain', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.5rem' }} />
-              </div>
-            )}
-
-            <button className="primary-action" onClick={() => navigate("/user/track")} style={{ width: '100%', padding: '0.75rem', justifyContent: 'center' }}>
-              Acknowledge & Track Queue
+            <button className="primary-action" onClick={() => navigate("/user/track")} style={{ width: '100%', padding: '0.75rem', justifyContent: 'center', backgroundColor: '#0f172a', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold' }}>
+              View QR & Track Queue
             </button>
           </div>
         </div>
