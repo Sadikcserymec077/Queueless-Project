@@ -7,8 +7,8 @@
   --ink: #111827;
   --muted: #6b7280;
   --line: #e5e7eb;
-  --surface: #ffffff;
-  --surface-soft: #f9fafb;
+  --surface: rgba(255, 255, 255, 0.7);
+  --surface-soft: rgba(255, 255, 255, 0.4);
   --primary: #0f172a;
   --primary-dark: #000000;
   --success: #059669;
@@ -27,7 +27,7 @@ body {
   margin: 0;
   min-width: 320px;
   color: var(--ink);
-  background: #fafafa;
+  background: transparent;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -186,17 +186,23 @@ th {
   justify-content: center;
 }
 
-.home-bg {
+.app-bg {
   position: fixed;
-  top: 60px;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.95)), url('/hero-bg.png');
+  background: linear-gradient(rgba(240, 248, 255, 0.4), rgba(240, 248, 255, 0.7)), url('/hero-bg.png');
   background-size: cover;
   background-position: center;
   z-index: -1;
   pointer-events: none;
+}
+
+/* Global Glassmorphism */
+.top-nav, input, select, table, .toolbar, .entity-card, .auth-card, .profile-band, .stat-card, .dashboard-grid > article, .modal-content, .chatbot-window {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .home-hero h1,

@@ -30,7 +30,6 @@ export default function HomePage() {
 
   return (
     <>
-      <div className="home-bg" />
       <section className="page-stack">
       <div className="home-hero">
         <div>

@@ -24,6 +24,7 @@ import GlobalListener from "./components/GlobalListener.jsx";
 export default function App() {
   return (
     <>
+      <div className="app-bg" />
       <TopNav />
       <main className="app-main">
         <Routes>
