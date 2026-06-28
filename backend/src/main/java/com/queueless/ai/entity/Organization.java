@@ -55,6 +55,9 @@ public class Organization {
     @Column(nullable = false, length = 120)
     private String workingHours;
 
+    @Column(length = 100)
+    private String holidays;
+
     @Builder.Default
     @Column(nullable = false)
     private boolean active = true;

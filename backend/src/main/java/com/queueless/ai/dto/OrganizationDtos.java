@@ -13,6 +13,7 @@ public class OrganizationDtos {
             @NotBlank String contactNumber,
             @Email @NotBlank String email,
             @NotBlank String workingHours,
+            String holidays,
             String adminName,
             String adminEmail,
             String adminPassword
@@ -27,6 +28,7 @@ public class OrganizationDtos {
             String contactNumber,
             String email,
             String workingHours,
+            String holidays,
             boolean active,
             long activeCounters,
             long activeTokens,

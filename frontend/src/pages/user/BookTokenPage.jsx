@@ -18,6 +18,8 @@ export default function BookTokenPage() {
   const [error, setError] = useState("");
   const [busyCounter, setBusyCounter] = useState(null);
 
+  const selectedOrg = organizations.find(o => String(o.id) === organizationId);
+
   useEffect(() => {
     async function loadOrganizations() {
       try {
@@ -75,6 +77,32 @@ export default function BookTokenPage() {
           {organizations.map((organization) => <option key={organization.id} value={organization.id}>{organization.name}</option>)}
         </select>
       </div>
+
+      {selectedOrg && (
+        <div style={{ backgroundColor: "var(--bg-card, #fff)", border: "1px solid var(--border)", borderRadius: "8px", padding: "1.5rem", marginBottom: "2rem" }}>
+          <h2 style={{ marginTop: 0, marginBottom: "0.5rem" }}>{selectedOrg.name}</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", color: "var(--text-muted)", fontSize: "0.9rem" }}>
+            <div>
+              <strong style={{ color: "var(--text-primary)", display: "block", marginBottom: "0.25rem" }}>Address</strong>
+              {selectedOrg.address || "Not provided"}
+            </div>
+            <div>
+              <strong style={{ color: "var(--text-primary)", display: "block", marginBottom: "0.25rem" }}>Working Hours</strong>
+              {selectedOrg.workingHours || "Not provided"}
+            </div>
+            {selectedOrg.holidays && (
+              <div>
+                <strong style={{ color: "var(--text-primary)", display: "block", marginBottom: "0.25rem" }}>Closed On</strong>
+                {selectedOrg.holidays}
+              </div>
+            )}
+            <div>
+              <strong style={{ color: "var(--text-primary)", display: "block", marginBottom: "0.25rem" }}>Contact</strong>
+              {selectedOrg.contactNumber || "Not provided"}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="entity-grid">
         {counters.map((counter) => (

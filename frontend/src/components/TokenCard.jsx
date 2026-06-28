@@ -29,9 +29,9 @@ export default function TokenCard({ token, compact = false }) {
         </div>
       </dl>
       {!compact && (
-        <div className="token-footer">
+        <div className="token-footer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
           <span>Booked {formatDate(token.bookingTime)}</span>
-          {token.qrCodeData ? <img src={token.qrCodeData} alt={`QR for ${token.tokenNumber}`} /> : null}
+          {token.qrCodeData ? <img src={token.qrCodeData} alt={`QR for ${token.tokenNumber}`} style={{ width: '250px', height: '250px', objectFit: 'contain' }} /> : null}
         </div>
       )}
     </article>

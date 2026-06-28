@@ -62,6 +62,7 @@ public class OrganizationService {
                 .contactNumber(request.contactNumber().trim())
                 .email(request.email().trim().toLowerCase())
                 .workingHours(request.workingHours().trim())
+                .holidays(request.holidays() != null ? request.holidays().trim() : null)
                 .active(true)
                 .build();
                 
@@ -96,6 +97,7 @@ public class OrganizationService {
         organization.setContactNumber(request.contactNumber().trim());
         organization.setEmail(request.email().trim().toLowerCase());
         organization.setWorkingHours(request.workingHours().trim());
+        organization.setHolidays(request.holidays() != null ? request.holidays().trim() : null);
         return toResponse(organization);
     }
 
@@ -134,6 +136,7 @@ public class OrganizationService {
                 organization.getContactNumber(),
                 organization.getEmail(),
                 organization.getWorkingHours(),
+                organization.getHolidays(),
                 organization.isActive(),
                 counterRepository.countByOrganizationIdAndStatus(organization.getId(), CounterStatus.ACTIVE),
                 tokenRepository.countActiveByOrganizationId(organization.getId()),

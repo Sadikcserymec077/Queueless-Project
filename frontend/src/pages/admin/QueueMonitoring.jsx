@@ -6,6 +6,8 @@ import { countersApi, organizationsApi, tokensApi } from "../../services/api.js"
 import { subscribeToCounter } from "../../services/socket.js";
 import { apiError, formatDate } from "../../utils/format.js";
 import { useAuth } from "../../context/AuthContext.jsx";
+import QRScannerModal from "../../components/QRScannerModal.jsx";
+import { QrCode } from "lucide-react";
 
 export default function QueueMonitoring() {
   const { user } = useAuth();
@@ -15,6 +17,7 @@ export default function QueueMonitoring() {
   const [counterId, setCounterId] = useState("");
   const [queue, setQueue] = useState(null);
   const [error, setError] = useState("");
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   useEffect(() => {
     async function loadOrganizations() {
@@ -88,7 +91,10 @@ export default function QueueMonitoring() {
     <section className="page-stack">
       <div className="page-heading">
         <div><p className="eyebrow">Live operations</p><h1>Queue monitoring</h1></div>
-        <button className="secondary-action" type="button" onClick={loadQueue}><RefreshCw size={18} /> Refresh</button>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <button className="primary-action" type="button" onClick={() => setIsScannerOpen(true)}><QrCode size={18} /> Scan QR</button>
+          <button className="secondary-action" type="button" onClick={loadQueue}><RefreshCw size={18} /> Refresh</button>
+        </div>
       </div>
       {error ? <div className="alert alert-warning">{error}</div> : null}
 
@@ -156,6 +162,15 @@ export default function QueueMonitoring() {
           </div>
         </section>
       )}
+
+      <QRScannerModal 
+        isOpen={isScannerOpen} 
+        onClose={() => setIsScannerOpen(false)} 
+        onVerified={(token) => {
+          setTimeout(() => setIsScannerOpen(false), 2000);
+          loadQueue();
+        }}
+      />
     </section>
   );
 }

@@ -1,4 +1,4 @@
-import { Pencil, Plus, Search, Trash2, CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
+import { Pencil, Plus, Search, Trash2, CheckCircle, XCircle, Eye, EyeOff, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import StatusPill from "../../components/StatusPill.jsx";
 import { organizationsApi } from "../../services/api.js";
@@ -11,6 +11,7 @@ const emptyForm = {
   contactNumber: "",
   email: "",
   workingHours: "",
+  holidays: "",
   adminName: "",
   adminEmail: "",
   adminPassword: ""
@@ -25,6 +26,72 @@ export default function OrganizationManagement() {
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+
+  useEffect(() => {
+    // Only search if length > 2 and it doesn't match an already selected suggestion
+    if (!form.address || form.address.length < 3) {
+      setAddressSuggestions([]);
+      return;
+    }
+    
+    if (addressSuggestions.some(s => s.display_name === form.address)) {
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearchingAddress(true);
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(form.address)}&format=json&addressdetails=1&limit=5`);
+        const data = await res.json();
+        setAddressSuggestions(data || []);
+      } catch (err) {
+        console.error("Address search failed", err);
+      } finally {
+        setIsSearchingAddress(false);
+      }
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [form.address]);
+
+  const selectAddress = (suggestion) => {
+    setForm(prev => ({ 
+      ...prev, 
+      address: suggestion.display_name,
+      name: prev.name || suggestion.name || prev.name 
+    }));
+    setAddressSuggestions([]);
+  };
+
+  const fetchLocation = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+            const data = await res.json();
+            if (data && data.display_name) {
+              setForm(prev => ({ ...prev, address: data.display_name }));
+            } else {
+              setForm(prev => ({ ...prev, address: `${lat.toFixed(6)}, ${lon.toFixed(6)}` }));
+            }
+          } catch (err) {
+            console.error(err);
+            setForm(prev => ({ ...prev, address: `${lat.toFixed(6)}, ${lon.toFixed(6)}` }));
+          }
+        },
+        (error) => {
+          setError("Error fetching location: " + error.message);
+        }
+      );
+    } else {
+      setError("Geolocation is not supported by your browser");
+    }
+  };
 
   const load = async () => {
     try {
@@ -65,7 +132,8 @@ export default function OrganizationManagement() {
       address: organization.address,
       contactNumber: organization.contactNumber,
       email: organization.email,
-      workingHours: organization.workingHours
+      workingHours: organization.workingHours,
+      holidays: organization.holidays || ""
     });
   };
 
@@ -92,10 +160,64 @@ export default function OrganizationManagement() {
       <form className="management-form" onSubmit={submit}>
         <input required placeholder="Organization name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
         <select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value })}>{types.map((type) => <option key={type} value={type}>{type.replaceAll("_", " ")}</option>)}</select>
-        <input required placeholder="Address" value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} />
+        
+        <div style={{ display: "flex", gap: "0.5rem", gridColumn: "1 / -1", position: "relative" }}>
+          <div style={{ flex: 1, position: "relative" }}>
+            <input 
+              required 
+              placeholder="Search for address, hospital, or place..." 
+              value={form.address} 
+              onChange={(event) => setForm({ ...form, address: event.target.value })} 
+              style={{ width: "100%", margin: 0 }} 
+            />
+            {addressSuggestions.length > 0 && (
+              <ul style={{
+                position: "absolute", top: "100%", left: 0, right: 0, 
+                backgroundColor: "var(--bg-card, #fff)", border: "1px solid var(--border)",
+                borderRadius: "0 0 8px 8px", zIndex: 10, listStyle: "none", padding: 0, margin: 0,
+                maxHeight: "300px", overflowY: "auto", boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+              }}>
+                {addressSuggestions.map(s => (
+                  <li 
+                    key={s.place_id}
+                    onClick={() => selectAddress(s)}
+                    style={{ padding: "0.75rem 1rem", cursor: "pointer", borderBottom: "1px solid var(--border)", fontSize: "0.875rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}
+                  >
+                    {s.name && <strong style={{ color: "var(--text-primary)" }}>{s.name}</strong>}
+                    <span style={{ color: "var(--text-muted)" }}>{s.display_name}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <button type="button" className="secondary-action" onClick={fetchLocation} title="Fetch Live Location" style={{ whiteSpace: "nowrap", height: "42px" }}><MapPin size={18} /> Get Location</button>
+        </div>
+
         <input required placeholder="Contact number" value={form.contactNumber} onChange={(event) => setForm({ ...form, contactNumber: event.target.value })} />
         <input required type="email" placeholder="Organization Email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
-        <input required placeholder="Working hours" value={form.workingHours} onChange={(event) => setForm({ ...form, workingHours: event.target.value })} />
+        <input required placeholder="Working hours (e.g. 09:00 AM - 05:00 PM)" value={form.workingHours} onChange={(event) => setForm({ ...form, workingHours: event.target.value })} />
+        
+        <div style={{ gridColumn: "1 / -1", display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center", padding: "0.5rem 0" }}>
+          <span style={{ fontSize: "0.875rem", fontWeight: 500 }}>Weekly Holidays:</span>
+          {["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map(day => (
+            <label key={day} style={{ display: "flex", alignItems: "center", gap: "0.25rem", fontSize: "0.875rem", cursor: "pointer" }}>
+              <input 
+                type="checkbox" 
+                checked={form.holidays.includes(day)}
+                onChange={(e) => {
+                  let currentHolidays = form.holidays ? form.holidays.split(",").map(d => d.trim()).filter(Boolean) : [];
+                  if (e.target.checked) {
+                    currentHolidays.push(day);
+                  } else {
+                    currentHolidays = currentHolidays.filter(d => d !== day);
+                  }
+                  setForm({ ...form, holidays: currentHolidays.join(", ") });
+                }}
+              />
+              {day}
+            </label>
+          ))}
+        </div>
         {!editingId && (
           <fieldset style={{ display: "contents" }}>
             <p className="eyebrow" style={{ gridColumn: "1 / -1", margin: "1rem 0 0.5rem" }}>Admin Credentials</p>

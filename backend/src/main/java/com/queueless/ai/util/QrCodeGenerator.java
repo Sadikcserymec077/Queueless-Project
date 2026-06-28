@@ -16,7 +16,7 @@ public class QrCodeGenerator {
     public String generateDataUri(String payload) {
         try {
             QRCodeWriter writer = new QRCodeWriter();
-            BitMatrix matrix = writer.encode(payload, BarcodeFormat.QR_CODE, 220, 220);
+            BitMatrix matrix = writer.encode(payload, BarcodeFormat.QR_CODE, 400, 400);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             MatrixToImageWriter.writeToStream(matrix, "PNG", outputStream);
             String base64 = Base64.getEncoder().encodeToString(outputStream.toByteArray());
