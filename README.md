@@ -1,6 +1,6 @@
 <div align="center">
   
-  # 🚀 Q-Smart (formerly QueueLess AI)
+  # 🚀 Q-Smart (Manage Queue Through Digital)
   
   **A Production-Ready Full-Stack Queue & Appointment Management Platform**
   
