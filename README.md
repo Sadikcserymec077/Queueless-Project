@@ -1,6 +1,6 @@
 <div align="center">
   
-  # 🚀 QueueLess AI
+  # 🚀 Q-Smart (formerly QueueLess AI)
   
   **A Production-Ready Full-Stack Queue & Appointment Management Platform**
   
@@ -51,18 +51,23 @@
 
 ### ⏱️ Digital Token & Queue Booking
 - ✅ **Self-Service Booking**: Users can grab a token from any organization's counter.
+- ✅ **Secure Payments**: Razorpay integration for premium/paid service counters.
 - ✅ **Rate Limiting**: Strictly enforced limit of 2 active tokens per user per day.
 - ✅ **Smart Wait-Time Prediction**: Dynamic algorithm calculates estimated turn time.
 - ✅ **Status Lifecycle**: Pending → Serving → Completed (or Skipped/Cancelled).
 
 ### ⚡ Real-Time Features (WebSocket / STOMP)
 - ✅ **Live Queue Pushes**: Instant updates to all waiting users when a token is processed.
-- ✅ **"Call Next" Operations**: Counters trigger real-time UI refreshes globally.
+- ✅ **"Call Next" Operations**: Counters trigger real-time UI refreshes globally (Synchronized with DB Transactions).
 - ✅ **In-App Notifications**: Push notifications sent directly to the user's bell icon.
+
+### 🤖 AI Assistant Integration
+- ✅ **Q-Smart Assistant**: Built-in Google Gemini 1.5 Flash chatbot to guide users through the booking process and platform navigation.
+- ✅ **Context-Aware**: Fallback offline responses configured for system resilience.
 
 ### 🔔 Integrated Notifications
 - ✅ **Real-Time Bell Badge** with unread message counts.
-- ✅ **Branded Email Dispatch**: "QueueLess AI" branded emails powered by Gmail SMTP.
+- ✅ **Branded Email Dispatch**: "Q-Smart" branded emails powered by Gmail SMTP.
 - ✅ **Event Triggers**: Registration, Password Resets, Token Updates.
 
 ---
@@ -79,6 +84,8 @@
 | **Spring Mail** | SMTP email automation |
 | **Spring WebSocket (STOMP)**| Real-time bi-directional communication |
 | **JWT (jjwt 0.12.3)** | Stateless authentication |
+| **Razorpay SDK** | Payment Gateway Integration |
+| **Google Gemini API** | AI Chatbot logic |
 | **BCrypt** | Password hashing |
 | **Maven** | Build tool |
 
