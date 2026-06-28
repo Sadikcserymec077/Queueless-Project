@@ -49,6 +49,7 @@ public class PaymentService {
     private final NotificationService notificationService;
     private final WaitTimePredictionService waitTimePredictionService;
     private final QrCodeGenerator qrCodeGenerator;
+    private final TokenService tokenService;
 
     @Value("${razorpay.key.id}")
     private String razorpayKeyId;
@@ -223,7 +224,7 @@ public class PaymentService {
                 .paymentStatus("SUCCESS")
                 .build();
 
-        Token saved = tokenRepository.save(token);
+        Token saved = tokenRepository.saveAndFlush(token);
 
         notificationService.notifyUser(
                 user,
@@ -236,16 +237,9 @@ public class PaymentService {
                         "\nPlease show your QR code at the counter."
         );
 
-        return new TokenResponse(
-                saved.getId(), saved.getTokenNumber(),
-                saved.getUser().getId(), saved.getUser().getName(), saved.getUser().getPhone(),
-                saved.getCounter().getId(), saved.getCounter().getCounterName(),
-                saved.getCounter().getOrganization().getId(), saved.getCounter().getOrganization().getName(),
-                saved.getBookingTime(), null, saved.getStatus(),
-                saved.getEstimatedWaitTime(), null,
-                saved.getQrPayload(), saved.getQrCodeData(),
-                saved.getScheduledDate(), saved.getPatientCount()
-        );
+        tokenService.publishTokenUpdatesAfterCommit(counter.getId(), userId, saved.getId(), scheduledDate);
+
+        return tokenService.toResponse(saved);
     }
 
     private boolean verifySignature(String orderId, String paymentId, String signature) {

@@ -495,4 +495,19 @@ public class TokenService {
     private void publishQueue(Long counterId) {
         queueEventPublisher.publishCounterUpdate(counterId, getCounterQueue(counterId));
     }
+
+    public void publishTokenUpdatesAfterCommit(Long counterId, Long userId, Long tokenId, LocalDate scheduledDate) {
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    publishQueue(counterId);
+                    LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
+                    if (scheduledDate == null || scheduledDate.equals(today)) {
+                        queueEventPublisher.publishUserUpdate(userId, getQueueStatus(tokenId, userId, false));
+                    }
+                }
+            }
+        );
+    }
 }
