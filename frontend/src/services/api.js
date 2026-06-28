@@ -64,11 +64,13 @@ export const countersApi = {
   byOrganization: (organizationId) => unwrap(client.get(`/counters/organization/${organizationId}`)),
   create: (payload) => unwrap(client.post("/counters", payload)),
   update: (id, payload) => unwrap(client.put(`/counters/${id}`, payload)),
-  disable: (id) => unwrap(client.patch(`/counters/${id}/disable`))
+  disable: (id) => unwrap(client.patch(`/counters/${id}/disable`)),
+  setSchedule: (id, payload) => unwrap(client.post(`/counters/${id}/schedule`, payload)),
+  availableDates: (id) => unwrap(client.get(`/counters/${id}/available-dates`))
 };
 
 export const tokensApi = {
-  book: (counterId) => unwrap(client.post("/tokens", { counterId })),
+  book: (payload) => unwrap(client.post("/tokens", payload)),
   active: () => unwrap(client.get("/tokens/me/active")),
   status: (id) => unwrap(client.get(`/tokens/${id}/status`)),
   cancel: (id) => unwrap(client.patch(`/tokens/${id}/cancel`)),
@@ -92,4 +94,9 @@ export const notificationsApi = {
 
 export const analyticsApi = {
   dashboard: () => unwrap(client.get("/analytics/dashboard"))
+};
+
+export const paymentsApi = {
+  createOrder: (payload) => unwrap(client.post("/payments/create-order", payload)),
+  verify: (payload) => unwrap(client.post("/payments/verify", payload))
 };

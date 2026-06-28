@@ -1,7 +1,9 @@
 package com.queueless.ai.entity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -46,6 +49,22 @@ public class Counter {
 
     @Column(nullable = false, length = 120)
     private String serviceType;
+
+    // --- Feature 1: Future Date Booking ---
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "counter_available_dates", joinColumns = @JoinColumn(name = "counter_id"))
+    @Column(name = "available_date")
+    private List<LocalDate> availableDates = new ArrayList<>();
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer dailyCapacity = 100;
+
+    // --- Feature 2: Payment ---
+    @Builder.Default
+    @Column(nullable = false)
+    private Double bookingFee = 0.0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false)

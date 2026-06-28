@@ -46,7 +46,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/ws/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/organizations/**", "/api/counters/organization/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/organizations/**", "/api/counters/organization/**", "/api/counters/*/available-dates").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/payments/webhook").permitAll()
                         .requestMatchers("/api/admin/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN")
                         .anyRequest().authenticated()
                 )

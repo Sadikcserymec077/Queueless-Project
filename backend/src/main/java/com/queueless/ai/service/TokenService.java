@@ -11,6 +11,7 @@ import com.queueless.ai.entity.Token;
 import com.queueless.ai.entity.TokenStatus;
 import com.queueless.ai.entity.User;
 import com.queueless.ai.exception.BadRequestException;
+import com.queueless.ai.exception.CapacityExceededException;
 import com.queueless.ai.exception.ResourceNotFoundException;
 import com.queueless.ai.repository.TokenRepository;
 import com.queueless.ai.repository.UserRepository;
@@ -53,8 +54,21 @@ public class TokenService {
         if (!counter.getOrganization().isActive() || counter.getStatus() != CounterStatus.ACTIVE) {
             throw new BadRequestException("This counter is not accepting new tokens right now");
         }
-        if (tokenRepository.existsByUserIdAndCounterIdAndStatusIn(userId, counter.getId(), ACTIVE_STATUSES)) {
-            throw new BadRequestException("You already have an active token for this counter");
+
+        // Live booking check
+        if (request.scheduledDate() == null) {
+            if (tokenRepository.existsByUserIdAndCounterIdAndStatusIn(userId, counter.getId(), ACTIVE_STATUSES)) {
+                throw new BadRequestException("You already have an active token for this counter");
+            }
+        } else {
+            // Future booking validation
+            if (!counter.getAvailableDates().contains(request.scheduledDate())) {
+                throw new BadRequestException("The selected date is not available for booking");
+            }
+            long booked = tokenRepository.countByCounterIdAndScheduledDate(counter.getId(), request.scheduledDate());
+            if (booked >= counter.getDailyCapacity()) {
+                throw new CapacityExceededException("This date is fully booked for counter: " + counter.getCounterName());
+            }
         }
 
         Instant now = Instant.now();
@@ -65,7 +79,8 @@ public class TokenService {
         if (todayBookings >= 10) {
             throw new BadRequestException("You can only book up to 10 tokens per day across all organizations");
         }
-        String tokenNumber = generateTokenNumber(counter, now);
+        
+        String tokenNumber = generateTokenNumber(counter, now, request.scheduledDate());
         String qrPayload = "QLAI::" + tokenNumber + "::" + counter.getId();
         Token token = Token.builder()
                 .tokenNumber(tokenNumber)
@@ -76,16 +91,25 @@ public class TokenService {
                 .estimatedWaitTime(waitTimePredictionService.estimateWaitMinutes(counter.getId(), now))
                 .qrPayload(qrPayload)
                 .qrCodeData(qrCodeGenerator.generateDataUri(qrPayload))
+                .scheduledDate(request.scheduledDate())
+                .patientCount(1)
+                .paymentStatus(counter.getBookingFee() > 0 ? "PENDING" : "SUCCESS")
                 .build();
 
         Token saved = tokenRepository.save(token);
+        
         notificationService.notifyUser(
                 user,
                 "Token booked: " + saved.getTokenNumber(),
-                "Your token " + saved.getTokenNumber() + " has been booked for " + counter.getCounterName() + "."
+                "Your token " + saved.getTokenNumber() + " has been booked for " + counter.getCounterName() + 
+                (request.scheduledDate() != null ? " on " + request.scheduledDate() : "") + "."
         );
         publishQueue(counter.getId());
-        queueEventPublisher.publishUserUpdate(userId, getQueueStatus(saved.getId(), userId, false));
+        
+        if (request.scheduledDate() == null || request.scheduledDate().equals(today)) {
+            queueEventPublisher.publishUserUpdate(userId, getQueueStatus(saved.getId(), userId, false));
+        }
+        
         return toResponse(saved);
     }
 
@@ -124,16 +148,20 @@ public class TokenService {
                 )
                 .map(Token::getTokenNumber)
                 .orElse(null);
-        int peopleAhead = token.getStatus() == TokenStatus.WAITING
-                ? Math.toIntExact(tokenRepository.countByCounterIdAndStatusAndBookingTimeBefore(
-                        token.getCounter().getId(),
-                        TokenStatus.WAITING,
-                        token.getBookingTime()
-                ) + (current == null ? 0 : 1))
-                : 0;
-        int waitMinutes = token.getStatus() == TokenStatus.WAITING
-                ? peopleAhead * waitTimePredictionService.averageServiceMinutes(token.getCounter().getId())
-                : 0;
+                
+        int peopleAhead = 0;
+        int waitMinutes = 0;
+        
+        LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
+        if (token.getStatus() == TokenStatus.WAITING && (token.getScheduledDate() == null || token.getScheduledDate().equals(today))) {
+            peopleAhead = Math.toIntExact(tokenRepository.countByCounterIdAndStatusAndBookingTimeBefore(
+                    token.getCounter().getId(),
+                    TokenStatus.WAITING,
+                    token.getBookingTime()
+            ) + (current == null ? 0 : 1));
+            waitMinutes = peopleAhead * waitTimePredictionService.averageServiceMinutes(token.getCounter().getId());
+        }
+        
         return new QueueStatusResponse(
                 tokenResponse,
                 current,
@@ -208,8 +236,14 @@ public class TokenService {
                 .ifPresent(token -> {
                     throw new BadRequestException("Complete or skip the current token before calling the next one");
                 });
-        Token next = tokenRepository.findTopByCounterIdAndStatusOrderByBookingTimeAsc(counterId, TokenStatus.WAITING)
-                .orElseThrow(() -> new BadRequestException("No waiting tokens for " + counter.getCounterName()));
+                
+        LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
+        List<Token> liveTokens = tokenRepository.findLiveWaitingForCounter(counterId, today);
+        if (liveTokens.isEmpty()) {
+            throw new BadRequestException("No waiting tokens for " + counter.getCounterName());
+        }
+        
+        Token next = liveTokens.get(0);
         next.setStatus(TokenStatus.CALLED);
         next.setCalledAt(Instant.now());
         next.setEstimatedWaitTime(0);
@@ -270,14 +304,19 @@ public class TokenService {
         TokenResponse current = tokenRepository.findTopByCounterIdAndStatusOrderByCalledAtDesc(counterId, TokenStatus.CALLED)
                 .map(this::toResponse)
                 .orElse(null);
-        List<TokenResponse> waiting = tokenRepository.findTop20ByCounterIdAndStatusOrderByBookingTimeAsc(counterId, TokenStatus.WAITING)
+                
+        LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
+        List<TokenResponse> waiting = tokenRepository.findLiveWaitingForCounter(counterId, today)
                 .stream()
+                .limit(20)
                 .map(this::toResponse)
                 .toList();
+                
         List<TokenResponse> skipped = tokenRepository.findTop20ByCounterIdAndStatusOrderByBookingTimeAsc(counterId, TokenStatus.SKIPPED)
                 .stream()
                 .map(this::toResponse)
                 .toList();
+                
         return new AdminQueueResponse(
                 counter.getId(),
                 counter.getCounterName(),
@@ -322,25 +361,34 @@ public class TokenService {
     }
 
     public TokenResponse toResponse(Token token) {
-        Integer queuePosition = null;
+        Integer queuePosition = token.getQueuePosition();
         Integer estimatedWait = token.getEstimatedWaitTime();
         Instant expectedTurnTime = null;
 
+        LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneOffset.UTC);
+
         if (token.getStatus() == TokenStatus.WAITING) {
-            long waitingAhead = tokenRepository.countByCounterIdAndStatusAndBookingTimeBefore(
-                    token.getCounter().getId(),
-                    TokenStatus.WAITING,
-                    token.getBookingTime()
-            );
-            long currentService = tokenRepository.findTopByCounterIdAndStatusOrderByCalledAtDesc(
-                            token.getCounter().getId(),
-                            TokenStatus.CALLED
-                    )
-                    .map(current -> 1L)
-                    .orElse(0L);
-            queuePosition = Math.toIntExact(waitingAhead + 1);
-            estimatedWait = Math.toIntExact((waitingAhead + currentService) * waitTimePredictionService.averageServiceMinutes(token.getCounter().getId()));
-            expectedTurnTime = Instant.now().plus(Duration.ofMinutes(estimatedWait));
+            if (token.getScheduledDate() == null || token.getScheduledDate().equals(today)) {
+                long waitingAhead = tokenRepository.countByCounterIdAndStatusAndBookingTimeBefore(
+                        token.getCounter().getId(),
+                        TokenStatus.WAITING,
+                        token.getBookingTime()
+                );
+                long currentService = tokenRepository.findTopByCounterIdAndStatusOrderByCalledAtDesc(
+                                token.getCounter().getId(),
+                                TokenStatus.CALLED
+                        )
+                        .map(current -> 1L)
+                        .orElse(0L);
+                queuePosition = Math.toIntExact(waitingAhead + 1);
+                estimatedWait = Math.toIntExact((waitingAhead + currentService) * waitTimePredictionService.averageServiceMinutes(token.getCounter().getId()));
+                expectedTurnTime = Instant.now().plus(Duration.ofMinutes(estimatedWait));
+            } else {
+                // Future scheduled token
+                queuePosition = null;
+                estimatedWait = null;
+                expectedTurnTime = null;
+            }
         } else if (token.getStatus() == TokenStatus.CALLED) {
             queuePosition = 0;
             estimatedWait = 0;
@@ -363,7 +411,9 @@ public class TokenService {
                 estimatedWait,
                 expectedTurnTime,
                 token.getQrPayload(),
-                token.getQrCodeData()
+                token.getQrCodeData(),
+                token.getScheduledDate(),
+                token.getPatientCount()
         );
     }
 
@@ -373,13 +423,18 @@ public class TokenService {
                 .orElseThrow(() -> new ResourceNotFoundException("Token", id));
     }
 
-    private String generateTokenNumber(Counter counter, Instant now) {
+    private String generateTokenNumber(Counter counter, Instant now, LocalDate scheduledDate) {
         LocalDate date = LocalDate.ofInstant(now, ZoneOffset.UTC);
         Instant start = date.atStartOfDay().toInstant(ZoneOffset.UTC);
         Instant end = date.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
         long sequence = tokenRepository.countByCounterIdAndBookingTimeBetween(counter.getId(), start, end) + 1;
         String orgPrefix = counter.getOrganization().getName().replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
-        return orgPrefix + "-C" + counter.getId() + "-" + String.format("%03d", sequence);
+        
+        String suffix = scheduledDate != null 
+            ? "-" + scheduledDate.format(DateTimeFormatter.BASIC_ISO_DATE) 
+            : "";
+            
+        return orgPrefix + "-C" + counter.getId() + "-" + String.format("%03d", sequence) + suffix;
     }
 
     private void publishQueue(Long counterId) {

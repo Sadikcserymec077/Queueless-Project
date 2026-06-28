@@ -4,11 +4,13 @@ import com.queueless.ai.entity.TokenStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 public class TokenDtos {
     public record TokenRequest(
-            @NotNull Long counterId
+            @NotNull Long counterId,
+            LocalDate scheduledDate
     ) {
     }
 
@@ -28,7 +30,9 @@ public class TokenDtos {
             Integer estimatedWaitTimeMinutes,
             Instant expectedTurnTime,
             String qrPayload,
-            String qrCodeData
+            String qrCodeData,
+            LocalDate scheduledDate,
+            Integer patientCount
     ) {
     }
 

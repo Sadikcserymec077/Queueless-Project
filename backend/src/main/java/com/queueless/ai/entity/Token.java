@@ -13,6 +13,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -63,4 +64,17 @@ public class Token {
     @Lob
     @Column(columnDefinition = "TEXT")
     private String qrCodeData;
+
+    // --- Feature 1: Future Date Booking ---
+    private LocalDate scheduledDate;
+
+    private Integer queuePosition;
+
+    // --- Feature 2: Payment ---
+    @Builder.Default
+    private Integer patientCount = 1;
+
+    @Builder.Default
+    @Column(length = 20)
+    private String paymentStatus = "SUCCESS";
 }

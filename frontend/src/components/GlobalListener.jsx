@@ -11,15 +11,17 @@ export default function GlobalListener() {
   const timerRef = useRef(null);
 
   useEffect(() => {
-    if (!user || user.role !== "USER") return;
+    if (!user) return;
 
     const unsubscribe = subscribeToUser(user.id, (message) => {
       const tokenData = message.token ? message.token : message;
       
       if (tokenData && tokenData.status === "CALLED") {
-        setCalledToken(tokenData);
-        setTimeLeft(120);
-        playTingSound();
+        if (!window.location.pathname.startsWith("/admin")) {
+          setCalledToken(tokenData);
+          setTimeLeft(120);
+          playTingSound();
+        }
       }
     });
 

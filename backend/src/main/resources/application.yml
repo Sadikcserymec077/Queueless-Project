@@ -46,3 +46,8 @@ app:
     from: ${MAIL_FROM:QueueLess AI <mohammedsadiq4850@gmail.com>}
   queue:
     default-service-minutes: ${DEFAULT_SERVICE_MINUTES:8}
+
+razorpay:
+  key:
+    id: ${RAZORPAY_KEY_ID:rzp_test_T6J8RMHePPRV5h}
+    secret: ${RAZORPAY_KEY_SECRET:H15jaKlC0CZeH16nmGDt6i62}

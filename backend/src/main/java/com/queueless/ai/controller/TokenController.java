@@ -33,7 +33,7 @@ public class TokenController {
     private final TokenService tokenService;
 
     @PostMapping
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'SUPER_ADMIN', 'ORG_ADMIN')")
     public ApiResponse<TokenResponse> book(@Valid @RequestBody TokenRequest request) {
         return ApiResponse.success("Token booked", tokenService.bookToken(SecurityUtils.currentUser().getId(), request));
     }
@@ -99,14 +99,14 @@ public class TokenController {
     }
 
     @PostMapping("/{id}/request-cancel")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'SUPER_ADMIN', 'ORG_ADMIN')")
     public ApiResponse<Void> requestCancel(@PathVariable Long id) {
         tokenService.requestCancel(id, SecurityUtils.currentUser().getId());
         return ApiResponse.success("Cancellation request sent to organization", null);
     }
 
     @PostMapping("/{id}/request-delay")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'SUPER_ADMIN', 'ORG_ADMIN')")
     public ApiResponse<Void> requestDelay(@PathVariable Long id) {
         tokenService.requestDelay(id, SecurityUtils.currentUser().getId());
         return ApiResponse.success("Delay request sent to organization", null);

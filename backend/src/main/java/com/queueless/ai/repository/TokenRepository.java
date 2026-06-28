@@ -3,6 +3,7 @@ package com.queueless.ai.repository;
 import com.queueless.ai.entity.Token;
 import com.queueless.ai.entity.TokenStatus;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,49 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
     long countByStatus(TokenStatus status);
 
     List<Token> findByBookingTimeBetween(Instant from, Instant to);
+
+    // ── Feature 1: Future Date Booking ────────────────────────────────────────
+
+    /** Count tokens already booked for a specific counter on a specific future date */
+    long countByCounterIdAndScheduledDate(Long counterId, LocalDate scheduledDate);
+
+    /**
+     * Find all WAITING tokens for a specific scheduled date
+     * (used by the nightly cron job to assign queue positions).
+     */
+    @Query("""
+            select t from Token t
+            where t.scheduledDate = :date
+              and t.status = com.queueless.ai.entity.TokenStatus.WAITING
+            order by t.bookingTime asc
+            """)
+    List<Token> findWaitingByScheduledDate(@Param("date") LocalDate date);
+
+    /**
+     * Live queue for admins: only tokens that are active TODAY.
+     * Future-dated tokens (scheduledDate > today) stay invisible until their day.
+     */
+    @Query("""
+            select t from Token t
+            where t.counter.id = :counterId
+              and t.status = com.queueless.ai.entity.TokenStatus.WAITING
+              and (t.scheduledDate is null or t.scheduledDate = :today)
+            order by t.bookingTime asc
+            """)
+    List<Token> findLiveWaitingForCounter(@Param("counterId") Long counterId, @Param("today") LocalDate today);
+
+    /** User's upcoming tokens (future-scheduled, not yet active) */
+    @Query("""
+            select t from Token t
+            where t.user.id = :userId
+              and t.status = com.queueless.ai.entity.TokenStatus.WAITING
+              and t.scheduledDate is not null
+              and t.scheduledDate > :today
+            order by t.scheduledDate asc
+            """)
+    List<Token> findUpcomingForUser(@Param("userId") Long userId, @Param("today") LocalDate today);
+
+    // ── Existing complex JPQL queries ─────────────────────────────────────────
 
     @Query("""
             select t from Token t

@@ -25,6 +25,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ApiResponse.failure(exception.getMessage(), null));
     }
 
+    @ExceptionHandler(CapacityExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCapacityExceeded(CapacityExceededException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.failure(exception.getMessage(), null));
+    }
+
+    @ExceptionHandler(PaymentVerificationException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePaymentVerification(PaymentVerificationException exception) {
+        return ResponseEntity.badRequest().body(ApiResponse.failure(exception.getMessage(), null));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException exception) {
         Map<String, String> errors = new HashMap<>();
@@ -48,6 +59,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleUnhandled(Exception exception) {
         exception.printStackTrace();
+        try (java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter("exception_debug.log", true))) {
+            pw.println("=== EXCEPTION ===");
+            exception.printStackTrace(pw);
+        } catch(Exception e) {}
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.failure("Unexpected server error: " + exception.getMessage(), null));
     }

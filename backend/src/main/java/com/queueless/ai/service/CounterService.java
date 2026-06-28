@@ -11,6 +11,10 @@ import com.queueless.ai.exception.ResourceNotFoundException;
 import com.queueless.ai.repository.CounterRepository;
 import com.queueless.ai.repository.TokenRepository;
 import java.util.List;
+import com.queueless.ai.security.SecurityUtils;
+import com.queueless.ai.entity.Role;
+import com.queueless.ai.entity.User;
+import org.springframework.security.access.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +42,13 @@ public class CounterService {
 
     @Transactional
     public CounterResponse create(CounterRequest request) {
+        User currentUser = SecurityUtils.currentUser().getUser();
+        if (currentUser.getRole() == Role.ORG_ADMIN) {
+            if (currentUser.getOrganization() == null || !currentUser.getOrganization().getId().equals(request.organizationId())) {
+                throw new AccessDeniedException("Not authorized to create counters for this organization");
+            }
+        }
+        
         Organization organization = organizationService.find(request.organizationId());
         if (!organization.isActive()) {
             throw new BadRequestException("Cannot add counters to an inactive organization");
@@ -47,6 +58,7 @@ public class CounterService {
                 .counterName(request.counterName().trim())
                 .counterNumber(request.counterNumber())
                 .serviceType(request.serviceType().trim())
+                .bookingFee(request.bookingFee() == null ? 0.0 : request.bookingFee())
                 .status(request.status() == null ? CounterStatus.ACTIVE : request.status())
                 .build();
         return toResponse(counterRepository.save(counter));
@@ -55,11 +67,20 @@ public class CounterService {
     @Transactional
     public CounterResponse update(Long id, CounterRequest request) {
         Counter counter = find(id);
+        
+        User currentUser = SecurityUtils.currentUser().getUser();
+        if (currentUser.getRole() == Role.ORG_ADMIN) {
+            if (currentUser.getOrganization() == null || !currentUser.getOrganization().getId().equals(counter.getOrganization().getId()) || !currentUser.getOrganization().getId().equals(request.organizationId())) {
+                throw new AccessDeniedException("Not authorized to modify this organization's counters");
+            }
+        }
+
         Organization organization = organizationService.find(request.organizationId());
         counter.setOrganization(organization);
         counter.setCounterName(request.counterName().trim());
         counter.setCounterNumber(request.counterNumber());
         counter.setServiceType(request.serviceType().trim());
+        counter.setBookingFee(request.bookingFee() == null ? 0.0 : request.bookingFee());
         counter.setStatus(request.status() == null ? counter.getStatus() : request.status());
         return toResponse(counter);
     }
@@ -67,6 +88,14 @@ public class CounterService {
     @Transactional
     public CounterResponse disable(Long id) {
         Counter counter = find(id);
+        
+        User currentUser = SecurityUtils.currentUser().getUser();
+        if (currentUser.getRole() == Role.ORG_ADMIN) {
+            if (currentUser.getOrganization() == null || !currentUser.getOrganization().getId().equals(counter.getOrganization().getId())) {
+                throw new AccessDeniedException("Not authorized to modify this organization's counters");
+            }
+        }
+
         counter.setStatus(CounterStatus.INACTIVE);
         return toResponse(counter);
     }
@@ -90,7 +119,8 @@ public class CounterService {
                 counter.getServiceType(),
                 counter.getStatus(),
                 tokenRepository.countByCounterIdAndStatus(counter.getId(), TokenStatus.WAITING),
-                currentToken
+                currentToken,
+                counter.getBookingFee()
         );
     }
 }

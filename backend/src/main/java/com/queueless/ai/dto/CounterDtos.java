@@ -11,6 +11,7 @@ public class CounterDtos {
             @NotBlank String counterName,
             @NotNull @Min(1) Integer counterNumber,
             @NotBlank String serviceType,
+            Double bookingFee,
             CounterStatus status
     ) {
     }
@@ -24,7 +25,8 @@ public class CounterDtos {
             String serviceType,
             CounterStatus status,
             long waitingTokens,
-            String currentToken
+            String currentToken,
+            Double bookingFee
     ) {
     }
 }
