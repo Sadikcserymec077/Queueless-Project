@@ -10,7 +10,7 @@ public class AuthDtos {
             @NotBlank String name,
             @Email @NotBlank String email,
             @Size(min = 6, max = 80) String password,
-            String phone
+            @NotBlank String phone
     ) {
     }
 
