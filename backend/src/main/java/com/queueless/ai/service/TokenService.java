@@ -81,7 +81,7 @@ public class TokenService {
         Token saved = tokenRepository.save(token);
         notificationService.notifyUser(
                 user,
-                "Token booked",
+                "Token booked: " + saved.getTokenNumber(),
                 "Your token " + saved.getTokenNumber() + " has been booked for " + counter.getCounterName() + "."
         );
         publishQueue(counter.getId());
@@ -153,7 +153,7 @@ public class TokenService {
             throw new BadRequestException("Only waiting or called tokens can be cancelled");
         }
         token.setStatus(TokenStatus.CANCELLED);
-        notificationService.notifyUser(token.getUser(), "Token cancelled", "Token " + token.getTokenNumber() + " has been cancelled.");
+        notificationService.notifyUser(token.getUser(), "Token cancelled: " + token.getTokenNumber(), "Token " + token.getTokenNumber() + " has been cancelled.");
         publishQueue(token.getCounter().getId());
         queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
         return toResponse(token);
@@ -193,8 +193,9 @@ public class TokenService {
         if (token.getStatus() != TokenStatus.WAITING) {
             throw new BadRequestException("Only waiting tokens can be delayed");
         }
+        token.setStatus(TokenStatus.WAITING);
         token.setBookingTime(Instant.now());
-        notificationService.notifyUser(token.getUser(), "Token delayed", "Your token " + token.getTokenNumber() + " has been moved to the end of the line.");
+        notificationService.notifyUser(token.getUser(), "Token delayed: " + token.getTokenNumber(), "Your token " + token.getTokenNumber() + " has been moved to the end of the line.");
         publishQueue(token.getCounter().getId());
         queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
         return toResponse(token);
@@ -214,7 +215,7 @@ public class TokenService {
         next.setEstimatedWaitTime(0);
         notificationService.notifyUser(
                 next.getUser(),
-                "Your turn is ready",
+                "Your turn is ready: " + next.getTokenNumber(),
                 "Token " + next.getTokenNumber() + " is now being served at " + counter.getCounterName() + "."
         );
         publishQueue(counterId);
@@ -230,7 +231,7 @@ public class TokenService {
         }
         token.setStatus(TokenStatus.COMPLETED);
         token.setCompletedAt(Instant.now());
-        notificationService.notifyUser(token.getUser(), "Service completed", "Token " + token.getTokenNumber() + " has been completed.");
+        notificationService.notifyUser(token.getUser(), "Service completed: " + token.getTokenNumber(), "Token " + token.getTokenNumber() + " has been completed.");
         publishQueue(token.getCounter().getId());
         queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
         return toResponse(token);
@@ -243,7 +244,7 @@ public class TokenService {
             throw new BadRequestException("Only waiting or called tokens can be skipped");
         }
         token.setStatus(TokenStatus.SKIPPED);
-        notificationService.notifyUser(token.getUser(), "Token skipped", "Token " + token.getTokenNumber() + " was skipped.");
+        notificationService.notifyUser(token.getUser(), "Token skipped: " + token.getTokenNumber(), "Token " + token.getTokenNumber() + " was skipped.");
         publishQueue(token.getCounter().getId());
         queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
         return toResponse(token);
@@ -257,7 +258,7 @@ public class TokenService {
         }
         token.setStatus(TokenStatus.WAITING);
         token.setBookingTime(Instant.now());
-        notificationService.notifyUser(token.getUser(), "Token re-queued", "Your token " + token.getTokenNumber() + " has been added back to the queue.");
+        notificationService.notifyUser(token.getUser(), "Token re-queued: " + token.getTokenNumber(), "Your token " + token.getTokenNumber() + " has been added back to the queue.");
         publishQueue(token.getCounter().getId());
         queueEventPublisher.publishUserUpdate(token.getUser().getId(), toResponse(token));
         return toResponse(token);
