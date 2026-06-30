@@ -4,12 +4,37 @@ import { subscribeToUser } from "../services/socket.js";
 import { tokensApi } from "../services/api.js";
 import { BellRing, X, Clock } from "lucide-react";
 
+// Global audio context to handle browser autoplay policies
+let globalAudioCtx = null;
+
 export default function GlobalListener() {
   const { user } = useAuth();
   const [calledToken, setCalledToken] = useState(null);
   const [nextToast, setNextToast] = useState(null);
   const [timeLeft, setTimeLeft] = useState(120);
   const timerRef = useRef(null);
+
+  useEffect(() => {
+    // Initialize audio context on first user interaction to bypass autoplay restrictions
+    const handleInteraction = () => {
+      if (!globalAudioCtx) {
+        globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (globalAudioCtx.state === 'suspended') {
+        globalAudioCtx.resume();
+      }
+    };
+    
+    document.addEventListener("click", handleInteraction, { once: true });
+    document.addEventListener("touchstart", handleInteraction, { once: true });
+    document.addEventListener("keydown", handleInteraction, { once: true });
+    
+    return () => {
+      document.removeEventListener("click", handleInteraction);
+      document.removeEventListener("touchstart", handleInteraction);
+      document.removeEventListener("keydown", handleInteraction);
+    };
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -23,11 +48,11 @@ export default function GlobalListener() {
           setCalledToken(tokenData);
           setTimeLeft(120);
           playTingSound();
+          speak(`Your token ${tokenData.tokenNumber} is now being served at ${tokenData.counterName}.`);
         }
       } else if (tokenData && tokenData.status === "WAITING" && peopleAhead === 1) {
         if (!window.location.pathname.startsWith("/admin")) {
           setNextToast(tokenData);
-          // Play a slightly different/softer sound or just use ting
           playTingSound();
           setTimeout(() => setNextToast(null), 10000);
         }
@@ -75,24 +100,38 @@ export default function GlobalListener() {
 
   const playTingSound = () => {
     try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
+      if (!globalAudioCtx) {
+        globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (globalAudioCtx.state === 'suspended') {
+        globalAudioCtx.resume();
+      }
+      const oscillator = globalAudioCtx.createOscillator();
+      const gainNode = globalAudioCtx.createGain();
       
       oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
-      oscillator.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1); // A6 note
+      oscillator.frequency.setValueAtTime(880, globalAudioCtx.currentTime); // A5 note
+      oscillator.frequency.exponentialRampToValueAtTime(1760, globalAudioCtx.currentTime + 0.1); // A6 note
       
-      gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+      gainNode.gain.setValueAtTime(1, globalAudioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, globalAudioCtx.currentTime + 1.5);
       
       oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
+      gainNode.connect(globalAudioCtx.destination);
       
       oscillator.start();
-      oscillator.stop(audioCtx.currentTime + 1.5);
+      oscillator.stop(globalAudioCtx.currentTime + 1.5);
     } catch (e) {
       console.error("Audio playback failed", e);
+    }
+  };
+
+  const speak = (text) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9; // Slightly slower for clarity
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
     }
   };
 
