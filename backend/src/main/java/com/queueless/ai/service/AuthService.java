@@ -47,7 +47,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.password()))
                 .phone(request.phone() != null ? request.phone().trim() : null)
                 .role(Role.USER)
-                .emailVerificationToken(UUID.randomUUID().toString())
+                .emailVerified(true)
                 .build();
 
         User saved = userRepository.save(user);
@@ -69,10 +69,6 @@ public class AuthService {
         );
         User user = userRepository.findByEmail(request.email().trim().toLowerCase())
                 .orElseThrow(() -> new BadRequestException("User not found"));
-        
-        if (!user.isEmailVerified()) {
-            throw new BadRequestException("Please verify your email before logging in.");
-        }
         
         String token = jwtService.generateToken(new UserPrincipal(user));
         return new AuthResponse(token, "Bearer", toUserResponse(user));
