@@ -47,6 +47,24 @@ export default function LoginPage() {
           <Link to="/forgot-password" style={{ fontSize: "0.85rem", color: "var(--primary)", fontWeight: "600" }}>Forgot password?</Link>
         </div>
         <button className="primary-action w-100" disabled={busy} type="submit"><LogIn size={18} />{busy ? "Signing in" : "Login"}</button>
+
+        <div style={{ display: "flex", alignItems: "center", margin: "1.5rem 0", color: "#9ca3af" }}>
+          <div style={{ flex: 1, height: "1px", backgroundColor: "#e5e7eb" }}></div>
+          <span style={{ padding: "0 0.75rem", fontSize: "0.875rem" }}>or</span>
+          <div style={{ flex: 1, height: "1px", backgroundColor: "#e5e7eb" }}></div>
+        </div>
+        
+        <button 
+          type="button"
+          onClick={() => alert("Google OAuth is currently being configured for production. Please use standard email login for now.")}
+          style={{ width: "100%", padding: "0.75rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", backgroundColor: "white", border: "1px solid #d1d5db", borderRadius: "8px", color: "#374151", fontWeight: "600", cursor: "pointer", marginBottom: "1.5rem", transition: "background-color 0.2s" }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+        >
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style={{ width: "20px", height: "20px" }} />
+          Login with Google
+        </button>
+
         <p className="auth-note">New here? <Link to="/register">Create an account</Link></p>
       </form>
     </section>
