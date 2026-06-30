@@ -39,9 +39,11 @@ export function AuthProvider({ children }) {
       return response.user;
     },
     async register(payload) {
-      const response = await authApi.register(payload);
-      // Registration successful, but email needs verification. Do not login.
-      return response; // returning the message/user object
+      await authApi.register(payload);
+      // Auto-login since email verification is disabled
+      const loginResponse = await authApi.login({ email: payload.email, password: payload.password });
+      saveSession(loginResponse);
+      return loginResponse.user;
     },
     logout() {
       storage.removeToken();
