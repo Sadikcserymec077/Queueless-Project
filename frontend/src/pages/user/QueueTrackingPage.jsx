@@ -68,10 +68,28 @@ export default function QueueTrackingPage() {
         <EmptyState title="No live queue" text="Book a token to watch queue movement in real time." />
       ) : (
         <>
+          {/* Live Banner */}
+          <div style={{
+            background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
+            color: "white",
+            padding: "1.5rem",
+            borderRadius: "16px",
+            marginBottom: "1rem",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            boxShadow: "0 10px 15px -3px rgba(79, 70, 229, 0.3)"
+          }}>
+            <p style={{ margin: 0, fontSize: "0.875rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.9 }}>Now Serving</p>
+            <h2 style={{ margin: "0.5rem 0", fontSize: "3rem", fontWeight: "800", textShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
+              {status?.currentTokenBeingServed || "Waiting..."}
+            </h2>
+          </div>
+
           <TokenCard token={active} />
+          
           <div className="queue-panel">
-            <div><span>Current token</span><strong>{status?.currentTokenBeingServed || "Waiting to start"}</strong></div>
-            <div><span>People ahead</span><strong>{status?.peopleAhead ?? 0}</strong></div>
+            <div><span>People ahead of you</span><strong>{status?.peopleAhead ?? 0}</strong></div>
             <div><span>Estimated wait</span><strong>{minutesLabel(status?.estimatedWaitingTimeMinutes)}</strong></div>
             <div><span>Expected turn</span><strong>{formatDate(status?.expectedTurnTime)}</strong></div>
           </div>

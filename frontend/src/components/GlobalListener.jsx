@@ -7,6 +7,7 @@ import { BellRing, X, Clock } from "lucide-react";
 export default function GlobalListener() {
   const { user } = useAuth();
   const [calledToken, setCalledToken] = useState(null);
+  const [nextToast, setNextToast] = useState(null);
   const [timeLeft, setTimeLeft] = useState(120);
   const timerRef = useRef(null);
 
@@ -15,12 +16,20 @@ export default function GlobalListener() {
 
     const unsubscribe = subscribeToUser(user.id, (message) => {
       const tokenData = message.token ? message.token : message;
+      const peopleAhead = message.peopleAhead;
       
       if (tokenData && tokenData.status === "CALLED") {
         if (!window.location.pathname.startsWith("/admin")) {
           setCalledToken(tokenData);
           setTimeLeft(120);
           playTingSound();
+        }
+      } else if (tokenData && tokenData.status === "WAITING" && peopleAhead === 1) {
+        if (!window.location.pathname.startsWith("/admin")) {
+          setNextToast(tokenData);
+          // Play a slightly different/softer sound or just use ting
+          playTingSound();
+          setTimeout(() => setNextToast(null), 10000);
         }
       }
     });
@@ -171,6 +180,10 @@ export default function GlobalListener() {
             from { opacity: 0; transform: translateY(20px) scale(0.95); }
             to { opacity: 1; transform: translateY(0) scale(1); }
           }
+          @keyframes slideUp {
+            from { opacity: 0; transform: translateY(100%); }
+            to { opacity: 1; transform: translateY(0); }
+          }
           @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
             70% { box-shadow: 0 0 0 20px rgba(16, 185, 129, 0); }
@@ -178,6 +191,42 @@ export default function GlobalListener() {
           }
         `}
       </style>
+
+      {/* Render Toast for "Next in line" */}
+      {nextToast && !calledToken && (
+        <div style={{
+          position: "fixed",
+          bottom: "2rem",
+          right: "2rem",
+          backgroundColor: "#fff",
+          borderLeft: "4px solid #3b82f6",
+          padding: "1rem 1.5rem",
+          borderRadius: "8px",
+          boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+          display: "flex",
+          alignItems: "center",
+          gap: "1rem",
+          zIndex: 9999,
+          animation: "slideUp 0.3s ease-out forwards",
+          maxWidth: "400px"
+        }}>
+          <div style={{ color: "#3b82f6" }}>
+            <BellRing size={24} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <h4 style={{ margin: 0, fontSize: "1rem", color: "#111827", fontWeight: "600" }}>Get Ready!</h4>
+            <p style={{ margin: "0.25rem 0 0 0", fontSize: "0.875rem", color: "#4b5563" }}>
+              You are next in line for <strong>{nextToast.counterName}</strong>.
+            </p>
+          </div>
+          <button 
+            onClick={() => setNextToast(null)}
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: "#9ca3af" }}
+          >
+            <X size={20} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
