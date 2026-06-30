@@ -74,6 +74,47 @@ public class AuthService {
         return new AuthResponse(token, "Bearer", toUserResponse(user));
     }
 
+    @Transactional
+    public AuthResponse loginWithGoogle(com.queueless.ai.dto.AuthDtos.GoogleLoginRequest request) {
+        try {
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setBearerAuth(request.token());
+            org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>("", headers);
+            
+            org.springframework.http.ResponseEntity<java.util.Map> response = restTemplate.exchange(
+                    "https://www.googleapis.com/oauth2/v3/userinfo", 
+                    org.springframework.http.HttpMethod.GET, 
+                    entity, 
+                    java.util.Map.class
+            );
+            
+            java.util.Map<String, Object> payload = response.getBody();
+            if (payload == null || !payload.containsKey("email")) {
+                throw new BadRequestException("Failed to fetch Google profile");
+            }
+            
+            String email = ((String) payload.get("email")).toLowerCase();
+            String name = (String) payload.get("name");
+            
+            User user = userRepository.findByEmail(email).orElseGet(() -> {
+                User newUser = User.builder()
+                        .name(name != null ? name : "Google User")
+                        .email(email)
+                        .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                        .role(Role.USER)
+                        .emailVerified(true)
+                        .build();
+                return userRepository.save(newUser);
+            });
+            
+            String jwt = jwtService.generateToken(new UserPrincipal(user));
+            return new AuthResponse(jwt, "Bearer", toUserResponse(user));
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid Google token or unable to fetch profile");
+        }
+    }
+
     public UserResponse toUserResponse(User user) {
         Long orgId = user.getOrganization() != null ? user.getOrganization().getId() : null;
         String orgName = user.getOrganization() != null ? user.getOrganization().getName() : null;

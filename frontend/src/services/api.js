@@ -38,6 +38,7 @@ export async function unwrap(request) {
 
 export const authApi = {
   login: (payload) => unwrap(client.post("/auth/login", payload)),
+  loginWithGoogle: (payload) => unwrap(client.post("/auth/google", payload)),
   register: (payload) => unwrap(client.post("/auth/register", payload)),
   me: () => unwrap(client.get("/users/me")),
   updateProfile: (payload) => unwrap(client.put("/users/me", payload)),

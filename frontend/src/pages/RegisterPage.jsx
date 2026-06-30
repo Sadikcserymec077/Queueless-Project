@@ -1,11 +1,12 @@
 import { UserPlus, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useGoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../context/AuthContext.jsx";
 import { apiError } from "../utils/format.js";
 
 export default function RegisterPage() {
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [error, setError] = useState("");
@@ -25,6 +26,24 @@ export default function RegisterPage() {
       setBusy(false);
     }
   };
+
+  const handleGoogleSuccess = async (tokenResponse) => {
+    setBusy(true);
+    setError("");
+    try {
+      await loginWithGoogle(tokenResponse.access_token);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(apiError(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: () => setError("Google registration failed or was cancelled"),
+  });
 
   return (
     <section className="auth-layout">
@@ -53,13 +72,14 @@ export default function RegisterPage() {
         
         <button 
           type="button"
-          onClick={() => setError("Google OAuth is currently being configured for production. Please use standard email registration for now.")}
-          style={{ width: "100%", padding: "0.75rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", backgroundColor: "white", border: "1px solid #d1d5db", borderRadius: "8px", color: "#374151", fontWeight: "600", cursor: "pointer", marginBottom: "1.5rem", transition: "background-color 0.2s" }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+          disabled={busy}
+          onClick={() => googleLogin()}
+          style={{ width: "100%", padding: "0.75rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", backgroundColor: "white", border: "1px solid #d1d5db", borderRadius: "8px", color: "#374151", fontWeight: "600", cursor: busy ? "not-allowed" : "pointer", marginBottom: "1.5rem", transition: "background-color 0.2s" }}
+          onMouseOver={(e) => { if (!busy) e.currentTarget.style.backgroundColor = '#f9fafb'; }}
+          onMouseOut={(e) => { if (!busy) e.currentTarget.style.backgroundColor = 'white'; }}
         >
           <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style={{ width: "20px", height: "20px" }} />
-          Continue with Google
+          {busy ? "Connecting..." : "Continue with Google"}
         </button>
 
         <p className="auth-note">Already have an account? <Link to="/login">Login with Google</Link> or Email</p>

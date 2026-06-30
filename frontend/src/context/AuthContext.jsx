@@ -38,6 +38,11 @@ export function AuthProvider({ children }) {
       saveSession(response);
       return response.user;
     },
+    async loginWithGoogle(accessToken) {
+      const response = await authApi.loginWithGoogle({ token: accessToken });
+      saveSession(response);
+      return response.user;
+    },
     async register(payload) {
       await authApi.register(payload);
       // Auto-login since email verification is disabled

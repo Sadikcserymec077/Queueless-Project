@@ -1,11 +1,12 @@
 import { LogIn, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useGoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../context/AuthContext.jsx";
 import { apiError } from "../utils/format.js";
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [form, setForm] = useState({ email: "", password: "" });
@@ -27,6 +28,25 @@ export default function LoginPage() {
       setBusy(false);
     }
   };
+
+  const handleGoogleSuccess = async (tokenResponse) => {
+    setBusy(true);
+    setError("");
+    try {
+      const user = await loginWithGoogle(tokenResponse.access_token);
+      const fallback = (user.role === "SUPER_ADMIN" || user.role === "ORG_ADMIN" || user.role === "SUB_ADMIN") ? "/admin/dashboard" : "/user/dashboard";
+      navigate(location.state?.from?.pathname || fallback, { replace: true });
+    } catch (err) {
+      setError(apiError(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: () => setError("Google login failed or was cancelled"),
+  });
 
   return (
     <section className="auth-layout">
@@ -56,13 +76,14 @@ export default function LoginPage() {
         
         <button 
           type="button"
-          onClick={() => setError("Google OAuth is currently being configured for production. Please use standard email login for now.")}
-          style={{ width: "100%", padding: "0.75rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", backgroundColor: "white", border: "1px solid #d1d5db", borderRadius: "8px", color: "#374151", fontWeight: "600", cursor: "pointer", marginBottom: "1.5rem", transition: "background-color 0.2s" }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+          disabled={busy}
+          onClick={() => googleLogin()}
+          style={{ width: "100%", padding: "0.75rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", backgroundColor: "white", border: "1px solid #d1d5db", borderRadius: "8px", color: "#374151", fontWeight: "600", cursor: busy ? "not-allowed" : "pointer", marginBottom: "1.5rem", transition: "background-color 0.2s" }}
+          onMouseOver={(e) => { if (!busy) e.currentTarget.style.backgroundColor = '#f9fafb'; }}
+          onMouseOut={(e) => { if (!busy) e.currentTarget.style.backgroundColor = 'white'; }}
         >
           <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style={{ width: "20px", height: "20px" }} />
-          Login with Google
+          {busy ? "Connecting..." : "Login with Google"}
         </button>
 
         <p className="auth-note">New here? <Link to="/register">Create an account</Link></p>

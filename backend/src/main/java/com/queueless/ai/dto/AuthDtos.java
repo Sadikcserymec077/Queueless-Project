@@ -20,6 +20,11 @@ public class AuthDtos {
     ) {
     }
 
+    public record GoogleLoginRequest(
+            @NotBlank String token
+    ) {
+    }
+
     public record ForgotPasswordRequest(
             @Email @NotBlank String email
     ) {

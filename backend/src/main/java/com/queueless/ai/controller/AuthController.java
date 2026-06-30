@@ -36,6 +36,11 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Login successful", authService.login(request)));
     }
 
+    @PostMapping("/google")
+    public ResponseEntity<ApiResponse<AuthResponse>> loginWithGoogle(@Valid @RequestBody com.queueless.ai.dto.AuthDtos.GoogleLoginRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("Login successful", authService.loginWithGoogle(request)));
+    }
+
     @PostMapping("/verify-email")
     public ResponseEntity<ApiResponse<Void>> verifyEmail(@RequestParam String token) {
         authService.verifyEmail(token);
