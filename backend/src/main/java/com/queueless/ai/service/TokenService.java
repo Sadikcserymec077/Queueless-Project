@@ -50,7 +50,7 @@ public class TokenService {
     public TokenResponse bookToken(Long userId, TokenRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-        Counter counter = counterService.find(request.counterId());
+        Counter counter = counterService.findForUpdate(request.counterId());
         if (!counter.getOrganization().isActive() || counter.getStatus() != CounterStatus.ACTIVE) {
             throw new BadRequestException("This counter is not accepting new tokens right now");
         }

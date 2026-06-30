@@ -134,10 +134,16 @@ public class PaymentService {
      */
     @Transactional
     public TokenResponse verifyAndBook(Long userId, VerifyPaymentRequest request) {
-        Payment payment = paymentRepository.findByRazorpayOrderId(request.razorpayOrderId())
+        Payment payment = paymentRepository.findByRazorpayOrderIdForUpdate(request.razorpayOrderId())
                 .orElseThrow(() -> new BadRequestException("Payment order not found"));
 
         if (!"PENDING".equals(payment.getStatus())) {
+            if ("SUCCESS".equals(payment.getStatus())) {
+                Token token = tokenRepository.findTopByUserIdAndCounterIdAndStatusInOrderByBookingTimeDesc(
+                        userId, payment.getCounterId(), java.util.Set.of(TokenStatus.WAITING, TokenStatus.CALLED))
+                        .orElseThrow(() -> new BadRequestException("Payment successful but token not found"));
+                return tokenService.toResponse(token);
+            }
             throw new BadRequestException("This payment has already been processed");
         }
 
@@ -173,7 +179,7 @@ public class PaymentService {
                 return;
             }
 
-            Payment payment = paymentRepository.findByRazorpayOrderId(razorpayOrderId).orElse(null);
+            Payment payment = paymentRepository.findByRazorpayOrderIdForUpdate(razorpayOrderId).orElse(null);
             if (payment == null || !"PENDING".equals(payment.getStatus())) {
                 return; // Already processed or doesn't exist
             }
@@ -195,7 +201,7 @@ public class PaymentService {
     private TokenResponse generateToken(Long userId, Payment payment, LocalDate scheduledDate) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-        Counter counter = counterService.find(payment.getCounterId());
+        Counter counter = counterService.findForUpdate(payment.getCounterId());
 
         Instant now = Instant.now();
         LocalDate date = LocalDate.ofInstant(now, ZoneOffset.UTC);

@@ -106,6 +106,12 @@ public class CounterService {
                 .orElseThrow(() -> new ResourceNotFoundException("Counter", id));
     }
 
+    @Transactional
+    public Counter findForUpdate(Long id) {
+        return counterRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Counter", id));
+    }
+
     public CounterResponse toResponse(Counter counter) {
         String currentToken = tokenRepository.findTopByCounterIdAndStatusOrderByCalledAtDesc(counter.getId(), TokenStatus.CALLED)
                 .map(token -> token.getTokenNumber())

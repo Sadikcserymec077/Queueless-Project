@@ -9,4 +9,8 @@ public interface CounterRepository extends JpaRepository<Counter, Long> {
     List<Counter> findByOrganizationIdOrderByCounterNumberAsc(Long organizationId);
 
     long countByOrganizationIdAndStatus(Long organizationId, CounterStatus status);
+
+    @jakarta.persistence.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("SELECT c FROM Counter c WHERE c.id = :id")
+    java.util.Optional<Counter> findByIdForUpdate(@org.springframework.data.repository.query.Param("id") Long id);
 }
