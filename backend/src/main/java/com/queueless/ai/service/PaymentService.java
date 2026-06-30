@@ -212,7 +212,7 @@ public class PaymentService {
 
         String suffix = scheduledDate != null
                 ? "-" + scheduledDate.format(DateTimeFormatter.BASIC_ISO_DATE)
-                : "";
+                : "-" + date.format(DateTimeFormatter.BASIC_ISO_DATE);
         String tokenNumber = orgPrefix + "-C" + counter.getId() + "-" + String.format("%03d", sequence) + suffix;
         String qrPayload = "QLAI::" + tokenNumber + "::" + counter.getId();
 

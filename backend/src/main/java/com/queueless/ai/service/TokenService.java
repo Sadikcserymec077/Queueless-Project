@@ -487,7 +487,7 @@ public class TokenService {
         
         String suffix = scheduledDate != null 
             ? "-" + scheduledDate.format(DateTimeFormatter.BASIC_ISO_DATE) 
-            : "";
+            : "-" + date.format(DateTimeFormatter.BASIC_ISO_DATE);
             
         return orgPrefix + "-C" + counter.getId() + "-" + String.format("%03d", sequence) + suffix;
     }
