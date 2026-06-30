@@ -22,6 +22,8 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
 
     Optional<Token> findTopByUserIdAndStatusInOrderByBookingTimeDesc(Long userId, Collection<TokenStatus> statuses);
 
+    Optional<Token> findTopByUserIdAndCounterIdAndStatusInOrderByBookingTimeDesc(Long userId, Long counterId, Collection<TokenStatus> statuses);
+
     Optional<Token> findTopByCounterIdAndStatusOrderByBookingTimeAsc(Long counterId, TokenStatus status);
 
     Optional<Token> findTopByCounterIdAndStatusOrderByCalledAtDesc(Long counterId, TokenStatus status);
