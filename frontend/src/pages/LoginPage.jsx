@@ -56,7 +56,7 @@ export default function LoginPage() {
         
         <button 
           type="button"
-          onClick={() => alert("Google OAuth is currently being configured for production. Please use standard email login for now.")}
+          onClick={() => setError("Google OAuth is currently being configured for production. Please use standard email login for now.")}
           style={{ width: "100%", padding: "0.75rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", backgroundColor: "white", border: "1px solid #d1d5db", borderRadius: "8px", color: "#374151", fontWeight: "600", cursor: "pointer", marginBottom: "1.5rem", transition: "background-color 0.2s" }}
           onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
           onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
