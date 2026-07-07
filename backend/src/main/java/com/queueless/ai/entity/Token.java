@@ -61,7 +61,6 @@ public class Token {
     @Column(length = 1000)
     private String qrPayload;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String qrCodeData;
 
