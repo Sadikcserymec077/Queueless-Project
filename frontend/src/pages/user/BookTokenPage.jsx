@@ -33,9 +33,13 @@ export default function BookTokenPage() {
       try {
         const page = await organizationsApi.search({ q: q || undefined, size: 20 });
         setOrganizations(page.content);
-        if (!organizationId && page.content.length) {
-          setOrganizationId(String(page.content[0].id));
-        }
+        setOrganizationId(prev => {
+          if (page.content.length === 0) return "";
+          if (!prev || !page.content.find(o => String(o.id) === prev)) {
+            return String(page.content[0].id);
+          }
+          return prev;
+        });
       } catch (err) {
         setError(apiError(err));
       }
