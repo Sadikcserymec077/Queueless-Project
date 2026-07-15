@@ -167,7 +167,6 @@ export default function QueueMonitoring() {
         isOpen={isScannerOpen} 
         onClose={() => setIsScannerOpen(false)} 
         onVerified={(token) => {
-          setTimeout(() => setIsScannerOpen(false), 2000);
           loadQueue();
         }}
       />

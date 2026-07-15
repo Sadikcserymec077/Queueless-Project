@@ -35,11 +35,8 @@ export default function QRScannerModal({ isOpen, onClose, onVerified }) {
           const token = await tokensApi.verifyQr(decodedText);
           setVerifiedToken(token);
           setError(null);
-          // Wait briefly, then clear scanner UI and call onVerified
-          setTimeout(() => {
-            scanner.clear();
-            if (onVerified) onVerified(token);
-          }, 1500);
+          scanner.clear();
+          if (onVerified) onVerified(token);
         } catch (err) {
           setError(err?.response?.data?.message || "Invalid QR Code");
           scanner.resume();

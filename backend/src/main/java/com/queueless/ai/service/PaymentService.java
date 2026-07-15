@@ -228,6 +228,7 @@ public class PaymentService {
                 .scheduledDate(scheduledDate)
                 .patientCount(payment.getPatientCount())
                 .paymentStatus("SUCCESS")
+                .totalAmountPaid(payment.getFinalAmount())
                 .build();
 
         Token saved = tokenRepository.saveAndFlush(token);
