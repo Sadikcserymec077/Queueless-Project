@@ -76,4 +76,6 @@ public class Token {
     @Builder.Default
     @Column(length = 20)
     private String paymentStatus = "SUCCESS";
+
+    private Double totalAmountPaid;
 }

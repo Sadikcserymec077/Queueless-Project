@@ -10,7 +10,8 @@ import java.util.List;
 public class TokenDtos {
     public record TokenRequest(
             @NotNull Long counterId,
-            LocalDate scheduledDate
+            LocalDate scheduledDate,
+            Integer patientCount
     ) {
     }
 
@@ -32,7 +33,8 @@ public class TokenDtos {
             String qrPayload,
             String qrCodeData,
             LocalDate scheduledDate,
-            Integer patientCount
+            Integer patientCount,
+            Double totalAmountPaid
     ) {
     }
 

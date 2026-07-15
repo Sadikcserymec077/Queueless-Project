@@ -82,6 +82,9 @@ public class TokenService {
         
         String tokenNumber = generateTokenNumber(counter, now, request.scheduledDate());
         String qrPayload = "QLAI::" + tokenNumber + "::" + counter.getId();
+        int count = request.patientCount() != null ? request.patientCount() : 1;
+        double amount = counter.getBookingFee() * count;
+
         Token token = Token.builder()
                 .tokenNumber(tokenNumber)
                 .user(user)
@@ -92,8 +95,9 @@ public class TokenService {
                 .qrPayload(qrPayload)
                 .qrCodeData(qrCodeGenerator.generateDataUri(qrPayload))
                 .scheduledDate(request.scheduledDate())
-                .patientCount(1)
+                .patientCount(count)
                 .paymentStatus(counter.getBookingFee() > 0 ? "PENDING" : "SUCCESS")
+                .totalAmountPaid(amount)
                 .build();
 
         Token saved = tokenRepository.saveAndFlush(token);
@@ -468,7 +472,8 @@ public class TokenService {
                 token.getQrPayload(),
                 token.getQrCodeData(),
                 token.getScheduledDate(),
-                token.getPatientCount()
+                token.getPatientCount(),
+                token.getTotalAmountPaid()
         );
     }
 
