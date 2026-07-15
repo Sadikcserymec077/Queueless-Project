@@ -20,10 +20,14 @@ export function AuthProvider({ children }) {
           storage.setUser(freshUser);
           setUser(freshUser);
         } catch (err) {
-          // If token is invalid or expired, clear session
-          storage.removeToken();
-          storage.removeUser();
-          setUser(null);
+          // If token is invalid or expired (401/403), clear session
+          if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+            storage.removeToken();
+            storage.removeUser();
+            setUser(null);
+          } else {
+            console.error("Failed to load user profile:", err);
+          }
         }
       }
     }
