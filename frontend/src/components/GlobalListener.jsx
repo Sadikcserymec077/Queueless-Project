@@ -204,7 +204,6 @@ export default function GlobalListener() {
         <button 
           onClick={() => {
             setCalledToken(null);
-            window.location.reload(); 
           }}
           className="primary-action"
           style={{ width: "100%", padding: "0.75rem", fontSize: "1.125rem", justifyContent: "center" }}

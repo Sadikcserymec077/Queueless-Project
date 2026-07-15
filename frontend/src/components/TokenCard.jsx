@@ -24,6 +24,14 @@ export default function TokenCard({ token, compact = false }) {
           <dd>{token.queuePosition === 0 ? "Serving" : token.queuePosition ?? "Closed"}</dd>
         </div>
         <div>
+          <dt><UsersRound size={16} /> Members</dt>
+          <dd>{token.patientCount}</dd>
+        </div>
+        <div>
+          <dt><UsersRound size={16} /> Amount Paid</dt>
+          <dd>₹{token.totalAmountPaid || (token.patientCount * 10)}</dd>
+        </div>
+        <div>
           <dt><Hourglass size={16} /> Estimate</dt>
           <dd>{minutesLabel(token.estimatedWaitTimeMinutes)}</dd>
         </div>
