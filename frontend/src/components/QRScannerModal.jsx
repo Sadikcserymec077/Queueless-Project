@@ -78,12 +78,23 @@ export default function QRScannerModal({ isOpen, onClose, onVerified }) {
         <h2 style={{ marginTop: 0, marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Scan Token QR Code</h2>
         
         {verifiedToken ? (
-          <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-            <CheckCircle2 size={64} color="var(--primary-color)" style={{ marginBottom: '1rem' }} />
-            <h3 style={{ margin: '0 0 0.5rem' }}>Token Verified!</h3>
-            <p style={{ margin: 0, color: 'var(--text-muted)' }}>
+          <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+            <CheckCircle2 size={64} color="var(--primary-color)" style={{ marginBottom: '1rem', display: 'inline-block' }} />
+            <h3 style={{ margin: '0 0 0.5rem', color: '#15803d', fontSize: '1.5rem' }}>Valid Token!</h3>
+            <p style={{ margin: '0 0 1rem', color: 'var(--text-muted)' }}>
               User <strong>{verifiedToken.userName}</strong> (Token: {verifiedToken.tokenNumber})
             </p>
+            <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '1rem', borderRadius: '8px', textAlign: 'left', marginTop: '1rem' }}>
+              <p style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#166534', margin: '0 0 0.5rem' }}>
+                Members Admitted: {verifiedToken.patientCount} People
+              </p>
+              <p style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#1f2937', margin: '0 0 0.5rem' }}>
+                Total Paid: ₹{verifiedToken.totalAmountPaid || 0}
+              </p>
+              <p style={{ margin: 0, color: '#4b5563', fontSize: '0.9rem' }}>
+                Status: <span style={{ color: '#16a34a', fontWeight: 'bold' }}>PAID</span>
+              </p>
+            </div>
           </div>
         ) : (
           <div id="qr-reader" style={{ width: '100%', overflow: 'hidden', borderRadius: '8px' }}></div>

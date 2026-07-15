@@ -97,7 +97,8 @@ export default function BookTokenPage() {
         // Free booking!
         const token = await tokensApi.book({
           counterId: selectedCounter.id,
-          scheduledDate: formattedDate
+          scheduledDate: formattedDate,
+          patientCount: patientCount
         });
         setBooked(token);
         setIsProcessing(false);
